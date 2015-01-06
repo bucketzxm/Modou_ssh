@@ -1,0 +1,15 @@
+{
+"package_id"      : "com.modouwifi.vpnssh",
+"os_version"      : "1.1.26",
+"name"            : "app-ssh-vpn",
+"display_name"    : "SSH VPN",
+"author"          : "魔豆开发者",
+"author_mail"     : "dev@mochui.net",
+"homepage"        : "modouwifi.com",
+"version"         : "0.1.0",
+"release_date"    : "2015.1.6",
+"icon"            : "./res/icon.png",
+"location"        : "internal",
+"description"     : "实现企业和个人用户绕开防火墙，以便更好地开展工作",
+"instruction"     : "需要一个SSH的帐号，安装好SSH-VPN后可以通过触摸屏或魔豆路由宝手机应用配置服务器信息"
+}
