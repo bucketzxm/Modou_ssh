@@ -1,0 +1,15 @@
+{
+"package_id"        : "com.modouwifi.vpnssh",
+"os_version"        : "0.0.1",
+"name"              : "app-ssh-vpn",
+"display_name"      : "ssh VPN",
+"author"            : "bucketzxm",
+"author_mail"       : "",
+"homepage"          : "modouwifi.com",
+"version"           : "",
+"release_date"      : "",
+"icon"              : ".rec/icon.jpg",
+"location"          : "internal",
+"description"       : "使用SSH来进行VPN隧道上网",
+"instruction"       : ""
+}
