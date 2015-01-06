@@ -1,0 +1,69 @@
+#!/bin/sh
+
+
+CURDIR=$(cd $(dirname $0) && pwd)
+CONFIDR="$CURDIR/conf"
+
+PACKAGEID="com.modouwifi.vpnssh"
+
+
+# to tp
+
+TO_TP_TITLE="SSH-VPN"
+TO_TP_CONF_DIR="/data/conf/launcher/conf.d"
+TO_TP_CONF_FILE=$TO_TP_CONF_DIR/ssh.conf
+
+TO_TP_ICON="$CURDIR/res/icon.png"
+TO_TP_PRESSED_ICON="$CURDIR/res/picon.png"
+
+
+usage()
+{
+	echo "ERROR: action missing"
+	echo "syntax: $0 <start|stop|restart|status|config|install|uninstall>"
+	echo "example: $0 start"
+}
+
+install()
+{
+	#to tp
+	if [! -d $TO_TP_CONF_DIR ];then
+		mkdir -p $TO_TP_CONF_DIR
+	fi
+
+	echo "{" > "$TO_TP_DIR"
+}
+
+
+uninstall()
+{
+
+}
+
+
+stop()
+{
+
+}
+
+
+start()
+{
+
+
+}
+
+
+
+status()
+{
+
+}
+
+set_config()
+{}
+
+
+#main
+
+
