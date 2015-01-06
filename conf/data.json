@@ -1,0 +1,44 @@
+{
+    "state_ssh" : {
+      "id" : "state_ssh",
+      "name" : "状态",
+      "value" : false,
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "BOOL"
+      }
+    },
+    "service_ip_address" : {
+      "id" : "service_ip_address",
+      "name" : "服务地址",
+      "value" : "0.0.0.0",
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "STRING",
+        "min" : 7,
+        "max" : 15
+      }
+    },
+    "port_ssh" : {
+      "id" : "port_ssh",
+      "name" : "端口号",
+      "value" : 0,
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "INT",
+        "min" : 10,
+        "max" : 9999999
+      }
+    },
+    "password_ssh" : {
+      "id" : "password_ssh",
+      "name" : "密码",
+      "value" : "未设置",
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "PASSWORD",
+        "min" : 6,
+        "max" : 30
+      }
+    }
+ }

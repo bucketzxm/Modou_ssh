@@ -64,20 +64,19 @@
 		      "name" : "配置账号",
 		      "type" : "sub",
 		      "data" : {
-			  "service_ip_address" : {
-			  "id" : "service_ip_address",
-			  "access" : "RW"
-			},
-			"port_shadow_socks" : {
-			  "id" : "port_ssh",
-			  "access" : "RW"
-			},
-			"password_ssh" : {
-			  "id" : "password_ssh",
-			  "access" : "RW"
-			}
-		      }
+			      "service_ip_address" : {
+		      	      "id" : "service_ip_address",
+			          "access" : "RW"
+			      },
+			      "port_shadow_socks" : {
+			          "id" : "port_ssh",
+			          "access" : "RW"
+			      },
+			      "password_ssh" : {
+			          "id" : "password_ssh",
+			          "access" : "RW"
+			  
+			      }
+			  }
 		}
-	}
-
-
+}
