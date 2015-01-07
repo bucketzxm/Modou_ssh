@@ -59,14 +59,13 @@ stop()
 	return 0; 
 }
 
+$SSHCMD='sh'
 start()
 {
-    $CURDIR/sbin/ssh.sh starttp
-
-	$CUSTOM_BIN $CUSTOM_CONFIG_FILE
+    $SSHCMD $CURDIR/sbin/ssh.sh starttp
     /system/sbin/appInfo.sh set_status $PACAKGEID ISRUNNING
 
-   return 0;
+    return 0;
 
 }
 
