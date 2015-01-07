@@ -70,6 +70,13 @@ IptablesAdd()
     return 0
 }
 
+genRule()
+{
+	IptablesClear;
+	genDefaultRule;
+	genIptablesRule;	
+}
+
 stop()
 {
 	IptablesClear;
@@ -77,9 +84,7 @@ stop()
 
 start()
 {
-	IptablesClear;
-	genDefaultRule;
-	genIptablesRule;
+	genRule;
 	IptablesAdd;
 }
 
@@ -100,6 +105,13 @@ case "$1" in
 		exit 0;
 		;;
 
+	"genRule")
+		genRule;
+		if ["0" != "$?" ];then
+			exit 1;
+		fi
+		exit 0;
+		;;
 	*)
 		usage init;
 		exit 1;
