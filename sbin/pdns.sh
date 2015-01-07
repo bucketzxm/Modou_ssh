@@ -5,6 +5,7 @@ PDNSDBIN="$CURWDIR/../bin/pdnsd"
 PDNSDCONF="conf-dir=$CURWDIR/../conf/dnsmasq";
 DNSMASQCONF="$CURWDIR/../conf/ssh-vpn-dnsmasq.conf"
 TODNSMASQCONF="/data/conf/dns/ssh-vpn-dnsmasq.conf"
+PIDFILE="$CURWDIR/../conf/pdnsd.pid"
 
 addConfDir() {
     echo "$PDNSDCONF" > $DNSMASQCONF
@@ -19,14 +20,22 @@ dnsReload() {
     /etc/init.d/dnsmasq reload
 }
 
+pdnsStart(){
+    chown matrix $PDNSDCONFILE 1>/dev/null 2>&1
+    $PDNSDBIN -c $PDNSDCONFILE &
+    echo $! > $PIDFILE
+}
+
 start(){
     addConfDir
     dnsReload
+    pdnsStart
 }
 
 stop(){
     delConfDir
-    killall pdnsd 1>/dev/null 2>&1
+    pid=`cat $PIDFILE 2>/dev/null`;
+    kill $pid >/dev/null 2>&1;
     dnsReload
 }
 
