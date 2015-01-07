@@ -1,4 +1,5 @@
 #!/bin/sh
+echo $0 $1 $2
 
 server=$3
 port=$4
@@ -25,7 +26,7 @@ export AUTOSSH_PIDFILE=$PIDFILE
 
 CMDHEAD='"cmd":"'
 CMDTAIL='",'
-SHELLBUTTON1="$CURWDIR/../sbin/ssh.sh config"
+SHELLBUTTON1="$CURWDIR/../sbin/ssh.sh start"
 SHELLBUTTON2="$CURWDIR/../sbin/ssh.sh starttp"
 SHELLBUTTON22="$CURWDIR/../sbin/ssh.sh stop"
 
@@ -38,20 +39,30 @@ genCustomConfig()
 {
 	echo '
 	{
-		"title": "ssh vpn",
+		"title" : "ssh vpn",
 	' > $CUSTOMCONF
 
 	echo '
+		
 		"button1": {
+
 
 	' >> $CUSTOMCONF
 
 	echo $CMDBUTTON1 >> $CUSTOMCONF
 
+	echo '
+		"txt" : "启动",
+		"code" : {
+			"0" : "start success",
+			"-1": "start failed"
+		}
+	}
 
-	
+	' >> $CUSTOMCONF
+
+	echo '}' >> $CUSTOMCONF
 	return 0;
-
 
 }
 
@@ -63,13 +74,18 @@ genWrpperShell(){
 	echo "$CURWDIR/../bin/sshpass -e $CURWDIR/../bin/ssh \$@" >> $WRPPERSHELL
 }
 
-start(){
+starttp()
+{
 	genCustomConfig
-	genWrpperShell
 	$CUSTOMBIN $CUSTOMCONF
+	return 0;
+}
+start(){
+	genWrpperShell
 	chmod +x $WRPPERSHELL
 
 	$AUTOSSHBIN -M 7000 $SSHFLAG
+	return 0;
 }
 
 stop(){
@@ -78,7 +94,7 @@ stop(){
 }
 
 case "$1" in
-    "stop")
+    "stop" )
         stop;
         if [[ "0" != "$?" ]]; then
             exit 1;
@@ -86,7 +102,7 @@ case "$1" in
         exit 0;
         ;;
 
-    "start")
+    "start" )
         start;
         if [[ "0" != "$?" ]]; then
             exit 1;
@@ -94,7 +110,7 @@ case "$1" in
         exit 0;
         ;;
 
-    "genshell")
+    "genshell" )
         genWrpperShell;
         if [[ "0" != "$?" ]]; then
             exit 1;
@@ -102,9 +118,11 @@ case "$1" in
         exit 0;
         ;;
 
-    *)
-        usage init;
-        exit 1;
-        ;;
+	"starttp"):
+		starttp;
+		exit 0;
+		;;
+    * )
+        usage init;;
 esac
 
