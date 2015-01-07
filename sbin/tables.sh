@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 CURWDIR=$(cd $(dirname $0) && pwd)
 
 SERVERADDR=$2
@@ -54,8 +54,11 @@ genIptablesRule()
     if [ -f "$DEFAULTLIST" ]; then
         echo "" >> $IPTABLESRULE
         cat $DEFAULTWHITE >> $IPTABLESRULE
-        echo "-A SSH -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
     fi
+    # redirect to socket proxy prot
+    echo "-A SSH -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    # redirect pdns tcp connect to local port
+    echo "-A PDNSD -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
     # ignore server addr
     echo "-I SSH -d $SERVERADDR -j RETURN"  >> $IPTABLESRULE
     echo "COMMIT" >> $IPTABLESRULE
@@ -72,46 +75,46 @@ IptablesAdd()
 
 genRule()
 {
-	IptablesClear;
-	genDefaultRule;
-	genIptablesRule;	
+    IptablesClear;
+    genDefaultRule;
+    genIptablesRule;    
 }
 
 stop()
 {
-	IptablesClear;
+    IptablesClear;
 }
 
 start()
 {
-	genRule;
-	IptablesAdd;
+    genRule;
+    IptablesAdd;
 }
 
 case "$1" in
-	"stop")
-	    stop;
-		if [ "0" != "$?" ];then
-			exit 1;
-		fi
-		exit 0;
-		;;
+    "stop")
+        stop;
+        if [[ "0" != "$?" ]]; then
+            exit 1;
+        fi
+        exit 0;
+        ;;
 
-	"start")
-		start;
-		if ["0" != "$?" ];then
-			exit 1;
-		fi
-		exit 0;
-		;;
+    "start")
+        start;
+        if [[ "0" != "$?" ]]; then
+            exit 1;
+        fi
+        exit 0;
+        ;;
 
-	"genrule")
-		genRule;
-		if ["0" != "$?" ];then
-			exit 1;
-		fi
-		exit 0;
-		;;
+    "genrule")
+        genRule;
+        if [[ "0" != "$?" ]]; then
+            exit 1;
+        fi
+        exit 0;
+        ;;
     *)
         usage init;
         exit 1;
