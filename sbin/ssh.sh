@@ -12,15 +12,23 @@ PIDFILE="$CURWDIR/../conf/autossh.pid"
 #SSHFLAG="-p $password $CURWDIR/../bin/ssh -L *:1080:*:22 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
 SSHFLAG="-p $password $CURWDIR/../bin/ssh -D 1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
 AUTOSSHBIN="$CURWDIR/../bin/autossh"
+WRPPERSHELL="$CURWDIR/../sbin/wrpper.sh"
 
 # set autossh Env var
 export AUTOSSH_GATETIME="30"
 export AUTOSSH_POLL="600"
-export AUTOSSH_PATH="$CURWDIR/../bin/ssh"
+export AUTOSSH_PATH="$WRPPERSHELL"
 export AUTOSSH_PIDFILE=$PIDFILE
-export OPENSSH_PASSWORD=$password
+
+genWrpperShell(){
+	echo "#!/bin/sh" > $WRPPERSHELL
+	echo "export SSHPASS=$password" >> $WRPPERSHELL
+	echo "$CURWDIR/../bin/sshpass -e $CURWDIR/../bin/ssh \$@" >> $WRPPERSHELL
+}
 
 start(){
+	genWrpperShell
+	chmod +x $WRPPERSHELL
 	$AUTOSSHBIN -M 7000 $SSHFLAG
 }
 
@@ -40,6 +48,14 @@ case "$1" in
 
     "start")
         start;
+        if [[ "0" != "$?" ]]; then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+
+    "genshell")
+        genWrpperShell;
         if [[ "0" != "$?" ]]; then
             exit 1;
         fi
