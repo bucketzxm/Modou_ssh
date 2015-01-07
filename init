@@ -77,7 +77,12 @@ status()
 set_config()
 {
     #remain to be config
-
+	
+    $CURDIR/sbin/ssh.sh syncConfig
+    $CURDIR/sbin/ssh.sh stop
+	$CURDIR/sbin/ssh.sh start
+    /system/sbin/appInfo.sh set_status $PACKAGEID ISRUNNING
+	return 0;
 }
 
 
