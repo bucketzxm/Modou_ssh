@@ -33,7 +33,7 @@ genDefaultRule()
     if [ ! -f "$DEFAULTLIST" ]; then
         return 1
     fi
-    # add all rule to SHADOWSOCKS Chain
+    # add all rule to SSH Chain
     rm $DEFAULTWHITE
     for lines in `cat $DEFAULTLIST`; do
         echo "-A SSH -d $lines -j RETURN" >> $DEFAULTWHITE
@@ -48,7 +48,7 @@ genIptablesRule()
     # delete last 2 line
     sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
     # add default tables
-    echo "" >> $IPTABLESRULE
+    echo "" > $IPTABLESRULE
     cat $DEFAULTTABLES >> $IPTABLESRULE
     # add defaultlist
     if [ -f "$DEFAULTLIST" ]; then
