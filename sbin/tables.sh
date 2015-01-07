@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 CURWDIR=$(cd $(dirname $0) && pwd)
 
 SERVERADDR=$2
@@ -14,7 +14,7 @@ IPTABLESRULE=$CURWDIR/../conf/iptables.tables
 usage()
 {
     echo "ERROR: action missing"
-    echo "syntax: $0 <start|stop> serveraddress localport"
+    echo "syntax: $0 <start|stop|genrule> serveraddress localport"
     echo "example: $0 start"
 }
 
@@ -105,15 +105,15 @@ case "$1" in
 		exit 0;
 		;;
 
-	"genRule")
+	"genrule")
 		genRule;
 		if ["0" != "$?" ];then
 			exit 1;
 		fi
 		exit 0;
 		;;
-	*)
-		usage init;
-		exit 1;
-		;;
+    *)
+        usage init;
+        exit 1;
+        ;;
 esac
