@@ -7,6 +7,7 @@ password=$6
 
 CURWDIR=$(cd $(dirname $0) && pwd)
 CUSTOMCONF="$CURWDIR/../conf/custom.conf"
+CUSTOMBIN="/system/apps/tp/bin/custom"
 PIDFILE="$CURWDIR/../conf/autossh.pid"
 
 #SSHFLAG="-p $password $CURWDIR/../bin/ssh -L *:1080:*:22 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
@@ -20,6 +21,42 @@ export AUTOSSH_POLL="600"
 export AUTOSSH_PATH="$WRPPERSHELL"
 export AUTOSSH_PIDFILE=$PIDFILE
 
+
+
+CMDHEAD='"cmd":"'
+CMDTAIL='",'
+SHELLBUTTON1="$CURWDIR/../sbin/ssh.sh config"
+SHELLBUTTON2="$CURWDIR/../sbin/ssh.sh starttp"
+SHELLBUTTON22="$CURWDIR/../sbin/ssh.sh stop"
+
+CMDBUTTON1=${CMDHEAD}${SHELLBUTTON1}${CMDTAIL}
+CMDBUTTON2=${CMDHEAD}${SHELLBUTTON2}${CMDTAIL}
+CMDBUTTON22=${CMDHEAD}${SHELLBUTTON22}${CMDTAIL}
+
+
+genCustomConfig()
+{
+	echo '
+	{
+		"title": "ssh vpn",
+	' > $CUSTOMCONF
+
+	echo '
+		"button1": {
+
+	' >> $CUSTOMCONF
+
+	echo $CMDBUTTON1 >> $CUSTOMCONF
+
+
+	
+	return 0;
+
+
+}
+
+
+
 genWrpperShell(){
 	echo "#!/bin/sh" > $WRPPERSHELL
 	echo "export SSHPASS=$password" >> $WRPPERSHELL
@@ -27,8 +64,11 @@ genWrpperShell(){
 }
 
 start(){
+	genCustomConfig
 	genWrpperShell
+	$CUSTOMBIN $CUSTOMCONF
 	chmod +x $WRPPERSHELL
+
 	$AUTOSSHBIN -M 7000 $SSHFLAG
 }
 
