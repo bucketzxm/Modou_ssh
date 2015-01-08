@@ -10,8 +10,10 @@ CUSTOMCONF="$CURWDIR/../conf/custom.conf"
 CUSTOMBIN="/system/apps/tp/bin/custom"
 
 CUSTOMSETCONF="$CURWDIR/../conf/customset.conf"
+SETCONF="$CURWDIR/../conf/set.conf"
 DATAJSON="$CURWDIR/../conf/data.json"
-
+# 生成密码配置文件
+[ ! -f $CUSTOMSETCONF ] && cp $SETCONF 	$CUSTOMSETCONF
 
 PIDFILE="$CURWDIR/../conf/autossh.pid"
 
@@ -43,8 +45,18 @@ config()
 {
 	generate-config-file $CUSTOMSETCONF	
 	
+	serveraddr=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+	serverport=`head -n 2 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+	passwd=`head -n 3 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+	
 
+	/system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $serveraddr
+	/system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $serverport
+	/system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $passwd
+
+	return 0;
 }
+
 
 
 genCustomConfig()
