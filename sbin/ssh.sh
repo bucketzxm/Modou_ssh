@@ -1,9 +1,9 @@
 #!/bin/sh
 
-server=$3
-port=$4
-user=$5
-password=$6
+server=$2
+port=$3
+user=$4
+password=$5
 
 CURWDIR=$(cd $(dirname $0) && pwd)
 CUSTOMCONF="$CURWDIR/../conf/custom.conf"
@@ -16,9 +16,10 @@ DATAJSON="$CURWDIR/../conf/data.json"
 [ ! -f $CUSTOMSETCONF ] && cp $SETCONF 	$CUSTOMSETCONF
 
 PIDFILE="$CURWDIR/../conf/autossh.pid"
-
-#SSHFLAG="-p $password $CURWDIR/../bin/ssh -L *:1080:*:22 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
-SSHFLAG="-p $password $CURWDIR/../bin/ssh -D 1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
+#local network proxy
+SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
+#localhost proxy
+#SSHFLAG="$CURWDIR/../bin/ssh -ND 1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
 AUTOSSHBIN="$CURWDIR/../bin/autossh"
 WRPPERSHELL="$CURWDIR/../sbin/wrpper.sh"
 
@@ -27,8 +28,6 @@ export AUTOSSH_GATETIME="30"
 export AUTOSSH_POLL="600"
 export AUTOSSH_PATH="$WRPPERSHELL"
 export AUTOSSH_PIDFILE=$PIDFILE
-
-
 
 CMDHEAD='"cmd":"'
 CMDTAIL='",'
@@ -39,6 +38,13 @@ SHELLBUTTON22="$CURWDIR/../sbin/ssh.sh config"
 CMDBUTTON1=${CMDHEAD}${SHELLBUTTON1}${CMDTAIL}
 CMDBUTTON2=${CMDHEAD}${SHELLBUTTON2}${CMDTAIL}
 CMDBUTTON22=${CMDHEAD}${SHELLBUTTON22}${CMDTAIL}
+
+usage()
+{
+    echo "ERROR: action missing"
+    echo "syntax: $0 <start|stop|genrule|starttp|config> server port username password"
+    echo "example: $0 starttp"
+}
 
 
 config()
@@ -123,8 +129,6 @@ genCustomConfig()
 	return 0;
 
 }
-
-
 
 genWrpperShell(){
 	echo "#!/bin/sh" > $WRPPERSHELL
