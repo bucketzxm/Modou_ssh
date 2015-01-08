@@ -21,13 +21,13 @@ SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
 #localhost proxy
 #SSHFLAG="$CURWDIR/../bin/ssh -ND 1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
 AUTOSSHBIN="$CURWDIR/../bin/autossh -f"
-WRPPERSHELL="$CURWDIR/../sbin/wrpper.sh"
 
 # set autossh Env var
 export AUTOSSH_GATETIME="30"
 export AUTOSSH_POLL="600"
-export AUTOSSH_PATH="$WRPPERSHELL"
+export AUTOSSH_PATH="$CURWDIR/../bin/sshp"
 export AUTOSSH_PIDFILE=$PIDFILE
+export OPENSSH_PASSWORD=$password
 
 CMDHEAD='"cmd":"'
 CMDTAIL='",'
@@ -123,17 +123,9 @@ genCustomConfig()
 
     ' >> $CUSTOMCONF
 
-    
-
     echo '}' >> $CUSTOMCONF
     return 0;
 
-}
-
-genWrpperShell(){
-    echo "#!/bin/sh" > $WRPPERSHELL
-    echo "export SSHPASS=$password" >> $WRPPERSHELL
-    echo "$CURWDIR/../bin/sshpass -e $CURWDIR/../bin/ssh \$@" >> $WRPPERSHELL
 }
 
 starttp()
@@ -143,17 +135,14 @@ starttp()
     return 0;
 }
 start(){
-    genWrpperShell
-    chmod +x $WRPPERSHELL
-
+    SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG
     return 0;
 }
 
 stop(){
-    # pid=`cat $PIDFILE 2>/dev/null`;
-    # kill $pid >/dev/null 2>&1;
-    killall ssh >/dev/null 2>&1;
+    pid=`cat $PIDFILE 2>/dev/null`;
+    kill $pid >/dev/null 2>&1;
 }
 
 case "$1" in
