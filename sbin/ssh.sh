@@ -13,14 +13,14 @@ CUSTOMSETCONF="$CURWDIR/../conf/customset.conf"
 SETCONF="$CURWDIR/../conf/set.conf"
 DATAJSON="$CURWDIR/../conf/data.json"
 # 生成密码配置文件
-[ ! -f $CUSTOMSETCONF ] && cp $SETCONF 	$CUSTOMSETCONF
+[ ! -f $CUSTOMSETCONF ] && cp $SETCONF  $CUSTOMSETCONF
 
 PIDFILE="$CURWDIR/../conf/autossh.pid"
 #local network proxy
 SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
 #localhost proxy
 #SSHFLAG="$CURWDIR/../bin/ssh -ND 1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
-AUTOSSHBIN="$CURWDIR/../bin/autossh"
+AUTOSSHBIN="$CURWDIR/../bin/autossh -f"
 WRPPERSHELL="$CURWDIR/../sbin/wrpper.sh"
 
 # set autossh Env var
@@ -49,110 +49,111 @@ usage()
 
 config()
 {
-	generate-config-file $CUSTOMSETCONF	
-	
-	serveraddr=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-	serverport=`head -n 2 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-	passwd=`head -n 3 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-	
+    generate-config-file $CUSTOMSETCONF 
+    
+    serveraddr=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    serverport=`head -n 2 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    passwd=`head -n 3 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    
 
-	/system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $serveraddr
-	/system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $serverport
-	/system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $passwd
+    /system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $serveraddr
+    /system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $serverport
+    /system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $passwd
 
-	return 0;
+    return 0;
 }
 
 
 
 genCustomConfig()
 {
-	echo '
-	{
-		"title" : "ssh vpn",
-	' > $CUSTOMCONF
+    echo '
+    {
+        "title" : "ssh vpn",
+    ' > $CUSTOMCONF
 
-	echo '
-		
-		"button1": {
+    echo '
+        
+        "button1": {
 
 
-	' >> $CUSTOMCONF
+    ' >> $CUSTOMCONF
 
-	echo $CMDBUTTON1 >> $CUSTOMCONF
+    echo $CMDBUTTON1 >> $CUSTOMCONF
 
-	echo '
-		"txt" : "启动",
-		"code" : {
-			"0" : "start success",
-			"-1": "start failed"
-		}
-	},
+    echo '
+        "txt" : "启动",
+        "code" : {
+            "0" : "start success",
+            "-1": "start failed"
+        }
+    },
 
-	' >> $CUSTOMCONF
+    ' >> $CUSTOMCONF
 
-	echo '
-		"button2": {
-	' >> $CUSTOMCONF
-	echo $CMDBUTTON2 >> $CUSTOMCONF
+    echo '
+        "button2": {
+    ' >> $CUSTOMCONF
+    echo $CMDBUTTON2 >> $CUSTOMCONF
 
-	echo '
-		"txt" : "停止",
-		"code" : {
-			"0" : "stop success",
-			"-1": "stop failed"
+    echo '
+        "txt" : "停止",
+        "code" : {
+            "0" : "stop success",
+            "-1": "stop failed"
 
-		}
-	},
-	' >> $CUSTOMCONF
+        }
+    },
+    ' >> $CUSTOMCONF
 
-	echo '
-		"button3":{
+    echo '
+        "button3":{
 
-	' >> $CUSTOMCONF
-	echo $CMDBUTTON22 >> $CUSTOMCONF
+    ' >> $CUSTOMCONF
+    echo $CMDBUTTON22 >> $CUSTOMCONF
 
-	echo '
-		"txt" : "配置",
-		"code": {
-			"0": "loading",
-			"-1": "exec failed"
-		}
+    echo '
+        "txt" : "配置",
+        "code": {
+            "0": "loading",
+            "-1": "exec failed"
+        }
 
-	}
+    }
 
-	' >> $CUSTOMCONF
+    ' >> $CUSTOMCONF
 
-	
+    
 
-	echo '}' >> $CUSTOMCONF
-	return 0;
+    echo '}' >> $CUSTOMCONF
+    return 0;
 
 }
 
 genWrpperShell(){
-	echo "#!/bin/sh" > $WRPPERSHELL
-	echo "export SSHPASS=$password" >> $WRPPERSHELL
-	echo "$CURWDIR/../bin/sshpass -e $CURWDIR/../bin/ssh \$@" >> $WRPPERSHELL
+    echo "#!/bin/sh" > $WRPPERSHELL
+    echo "export SSHPASS=$password" >> $WRPPERSHELL
+    echo "$CURWDIR/../bin/sshpass -e $CURWDIR/../bin/ssh \$@" >> $WRPPERSHELL
 }
 
 starttp()
 {
-	genCustomConfig
-	$CUSTOMBIN $CUSTOMCONF
-	return 0;
+    genCustomConfig
+    $CUSTOMBIN $CUSTOMCONF
+    return 0;
 }
 start(){
-	genWrpperShell
-	chmod +x $WRPPERSHELL
+    genWrpperShell
+    chmod +x $WRPPERSHELL
 
-	$AUTOSSHBIN -M 7000 $SSHFLAG
-	return 0;
+    $AUTOSSHBIN -M 7000 $SSHFLAG
+    return 0;
 }
 
 stop(){
-	pid=`cat $PIDFILE 2>/dev/null`;
-    kill $pid >/dev/null 2>&1;
+    # pid=`cat $PIDFILE 2>/dev/null`;
+    # kill $pid >/dev/null 2>&1;
+    killall ssh >/dev/null 2>&1;
 }
 
 case "$1" in
@@ -164,7 +165,7 @@ case "$1" in
         fi
         exit 0;
         ;;
-	#start ---> start ssh (second step)
+    #start ---> start ssh (second step)
     "start" )
         start;
         if [[ "0" != "$?" ]]; then
@@ -180,15 +181,15 @@ case "$1" in
         fi
         exit 0;
         ;;
-	# start ---> start tp ( first step)
-	"starttp"):
-		starttp;
-		exit 0;
-		;;
-	"config" ):
-		config;
-		exit 0;
-		;;
+    # start ---> start tp ( first step)
+    "starttp"):
+        starttp;
+        exit 0;
+        ;;
+    "config" ):
+        config;
+        exit 0;
+        ;;
 
     * )
         usage init;;
