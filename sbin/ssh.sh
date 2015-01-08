@@ -135,7 +135,7 @@ starttp()
     return 0;
 }
 start(){
-    SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
+    SSHFLAG="-N -D *:1080 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG
     return 0;
 }
