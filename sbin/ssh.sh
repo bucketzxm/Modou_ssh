@@ -1,5 +1,4 @@
 #!/bin/sh
-echo $0 $1 $2
 
 server=$3
 port=$4
@@ -9,6 +8,11 @@ password=$6
 CURWDIR=$(cd $(dirname $0) && pwd)
 CUSTOMCONF="$CURWDIR/../conf/custom.conf"
 CUSTOMBIN="/system/apps/tp/bin/custom"
+
+CUSTOMSETCONF="$CURWDIR/../conf/customset.conf"
+DATAJSON="$CURWDIR/../conf/data.json"
+
+
 PIDFILE="$CURWDIR/../conf/autossh.pid"
 
 #SSHFLAG="-p $password $CURWDIR/../bin/ssh -L *:1080:*:22 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
@@ -33,6 +37,14 @@ SHELLBUTTON22="$CURWDIR/../sbin/ssh.sh config"
 CMDBUTTON1=${CMDHEAD}${SHELLBUTTON1}${CMDTAIL}
 CMDBUTTON2=${CMDHEAD}${SHELLBUTTON2}${CMDTAIL}
 CMDBUTTON22=${CMDHEAD}${SHELLBUTTON22}${CMDTAIL}
+
+
+config()
+{
+	generate-config-file $CUSTOMSETCONF	
+	
+
+}
 
 
 genCustomConfig()
