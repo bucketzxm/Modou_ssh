@@ -26,9 +26,9 @@ export AUTOSSH_PIDFILE=$PIDFILE
 
 CMDHEAD='"cmd":"'
 CMDTAIL='",'
-SHELLBUTTON1="$CURWDIR/../sbin/ssh.sh start"
-SHELLBUTTON2="$CURWDIR/../sbin/ssh.sh starttp"
-SHELLBUTTON22="$CURWDIR/../sbin/ssh.sh stop"
+SHELLBUTTON1="$CURWDIR/../sbin/ssh.sh starttp"
+SHELLBUTTON2="$CURWDIR/../sbin/ssh.sh stop"
+SHELLBUTTON22="$CURWDIR/../sbin/ssh.sh config"
 
 CMDBUTTON1=${CMDHEAD}${SHELLBUTTON1}${CMDTAIL}
 CMDBUTTON2=${CMDHEAD}${SHELLBUTTON2}${CMDTAIL}
@@ -57,9 +57,43 @@ genCustomConfig()
 			"0" : "start success",
 			"-1": "start failed"
 		}
+	},
+
+	' >> $CUSTOMCONF
+
+	echo '
+		"button2": {
+	' >> $CUSTOMCONF
+	echo $CMDBUTTON2 >> $CUSTOMCONF
+
+	echo '
+		"txt" : "停止",
+		"code" : {
+			"0" : "stop success",
+			"-1": "stop failed"
+
+		}
+	},
+	' >> $CUSTOMCONF
+
+	echo '
+		"button3":{
+
+	' >> $CUSTOMCONF
+	echo $CMDBUTTON22 >> $CUSTOMCONF
+
+	echo '
+		"txt" : "配置",
+		"code": {
+			"0": "loading",
+			"-1": "exec failed"
+		}
+
 	}
 
 	' >> $CUSTOMCONF
+
+	
 
 	echo '}' >> $CUSTOMCONF
 	return 0;
@@ -94,6 +128,7 @@ stop(){
 }
 
 case "$1" in
+
     "stop" )
         stop;
         if [[ "0" != "$?" ]]; then
@@ -101,7 +136,7 @@ case "$1" in
         fi
         exit 0;
         ;;
-
+	#start ---> start ssh (second step)
     "start" )
         start;
         if [[ "0" != "$?" ]]; then
@@ -117,11 +152,16 @@ case "$1" in
         fi
         exit 0;
         ;;
-
+	# start ---> start tp ( first step)
 	"starttp"):
 		starttp;
 		exit 0;
 		;;
+	"config" ):
+		config;
+		exit 0;
+		;;
+
     * )
         usage init;;
 esac
