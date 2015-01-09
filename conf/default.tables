@@ -1,6 +1,6 @@
 :PDNSD - [0:0]
 :SSH - [0:0]
--I PREROUTING -p tcp -j SSH
+-A PREROUTING -i br-lan -p tcp -j SSH
 -A OUTPUT -p tcp -j PDNSD
 -A SSH -d 0.0.0.0/8 -j RETURN
 -A SSH -d 127.0.0.0/8 -j RETURN

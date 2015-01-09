@@ -6,7 +6,7 @@ REDSOCKSBIN="$CURWDIR/../bin/redsocks2"
 REDSOCKSCONF="$CURWDIR/../conf/redsocks.conf"
 PIDFILE="$CURWDIR/../conf/redsocks.pid"
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CURDIR/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CURWDIR/../lib
 
 usage()
 {

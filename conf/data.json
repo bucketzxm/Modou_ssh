@@ -30,6 +30,17 @@
         "max" : 9999999
       }
     },
+    "user" : {
+      "id" : "user",
+      "name" : "用户名",
+      "value" : 0,
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "STRING",
+        "min" : 1,
+        "max" : 32
+      }
+    },
     "password_ssh" : {
       "id" : "password_ssh",
       "name" : "密码",

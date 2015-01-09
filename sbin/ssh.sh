@@ -201,15 +201,12 @@ starttp()
     return 0;
 }
 start(){
-<<<<<<< HEAD
-    SSHFLAG="-N -D *:1080 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
-=======
 	server=`/system/sbin/json4sh.sh "get" $DATAJSON service_ip_address value`
 	port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
 	user=`/system/sbin/json4sh.sh "get" $DATAJSON user value`
 	password=`/system/sbin/json4sh.sh "get" $DATAJSON password_ssh value`	
-    SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
->>>>>>> 277f65c6cfcbb126b1a3a4b1827786e526fd0e93
+    export OPENSSH_PASSWORD=$password
+    SSHFLAG="-N -D *:1080 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG
     return 0;
 }
