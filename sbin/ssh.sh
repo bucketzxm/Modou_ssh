@@ -114,7 +114,19 @@ genRedSocksConfig()
 
 startRedSocks()
 {
+	iptables -t nat -N REDSOCKS
+	iptables -t nat -A PREROUTING -i br-lan -p tcp -j REDSOCKS
 
+	#do not redirect traffic to the followign address ranges
+	iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -j RETURN
+	iptables -t nat -A REDSOCKS -d 192.18.0.0/16 -j RETURN
+	iptables -t nat -A REDSOCKS -d 10.8.0.0/16 -j RETURN
+	iptables -t nat -A REDSOCKS -d 224.0.0.0/4 -j RETURN
+	iptables -t nat -A REDSOCKS -d 240.0.0.0/4 -j RETURN
+
+	# Redirect normal HTTP and HTTPS traffic
+	iptables -t nat -A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports 11111
+	iptables -t nat -A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports 11111
 	$CURWDIR/../bin/redsocks;
 
 }
@@ -189,6 +201,10 @@ starttp()
     return 0;
 }
 start(){
+	server=`/system/sbin/json4sh.sh "get" $DATAJSON service_ip_address value`
+	port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
+	user=`/system/sbin/json4sh.sh "get" $DATAJSON user value`
+	password=`/system/sbin/json4sh.sh "get" $DATAJSON password_ssh value`	
     SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG
     return 0;
