@@ -112,6 +112,12 @@ genRedSocksConfig()
 
 }
 
+startRedSocks()
+{
+
+	$CURWDIR/../bin/redsocks;
+
+}
 
 genCustomConfig()
 {
