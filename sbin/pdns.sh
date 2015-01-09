@@ -6,6 +6,7 @@ PDNSDCONF="conf-dir=$CURWDIR/../conf/dnsmasq";
 DNSMASQCONF="$CURWDIR/../conf/ssh-vpn-dnsmasq.conf"
 TODNSMASQCONF="/data/conf/dns/ssh-vpn-dnsmasq.conf"
 PIDFILE="$CURWDIR/../conf/pdnsd.pid"
+PDNSDCONFILE="$CURWDIR/../conf/pdnsd.conf"
 
 addConfDir() {
     echo "$PDNSDCONF" > $DNSMASQCONF
