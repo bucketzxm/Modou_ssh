@@ -51,18 +51,66 @@ config()
 {
     generate-config-file $CUSTOMSETCONF 
     
-    serveraddr=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-    serverport=`head -n 2 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-    passwd=`head -n 3 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    server=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    port=`head -n 2 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+	user=`head -n 3 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    password=`head -n 4 $CUSTOMSETCONF | cut -d ' ' -f2-`;
     
+	#命令中用的是port,user,server,这里直接重新赋值一下
 
-    /system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $serveraddr
-    /system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $serverport
-    /system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $passwd
+
+    /system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $server
+    /system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $port
+	/system/sbin/json4sh.sh "set" $DATAJSON user value $user
+    /system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $password
 
     return 0;
 }
 
+
+REDSOCKSCONF="$CURWDIR/../conf/redsocks.conf"
+genRedSocksConfig()
+{
+	
+
+	server=`/system/sbin/json4sh.sh "get" $DATAJSON server_ip_address value`
+	port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
+	user=`/system/sbin/json4sh.sh "get" $DATAJSON user value`
+	password=`/system/sbin/json4sh.sh "get" $DATAJSON password_ssh value`
+
+	echo '
+
+		base{
+			log_debug=off;
+			log_info=off;
+			log="file:
+	' >$REDSOCKSCONF
+
+	$REDSOCKSCONF >> $REDSOCKSCONF;
+	echo ';' >> $REDSOCKSCONF
+	echo '
+			
+			daemon=on;
+			redirector=iptables;
+			}	
+	' >> $REDSOCKSCONF
+	
+	echo '
+		redsocks {
+			local_ip = 192.168.1.1;
+			local_port = 
+	' >> $REDSOCKSCONF
+	$port >> $REDSOCKSCONF
+	echo ';' >>$REDSOCKSCONF
+	echo '
+		type=socks5;
+		autoproxy=1;
+		timeout=5;
+	'
+
+
+
+}
 
 
 genCustomConfig()
