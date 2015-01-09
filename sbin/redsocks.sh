@@ -4,7 +4,7 @@ CURWDIR=$(cd $(dirname $0) && pwd)
 
 REDSOCKSBIN="$CURWDIR/../bin/redsocks2"
 REDSOCKSCONF="$CURWDIR/../conf/redsocks.conf"
-REDSOCKSPID="$CURWDIR/../conf/redsocks.pid"
+PIDFILE="$CURWDIR/../conf/redsocks.pid"
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CURDIR/lib
 
@@ -16,7 +16,7 @@ usage()
 }
 
 start(){
-    $REDSOCKSBIN -c $REDSOCKSCONF -p $REDSOCKSPID
+    $REDSOCKSBIN -c $REDSOCKSCONF -p $PIDFILE
 }
 
 stop(){
