@@ -20,8 +20,9 @@ start(){
 }
 
 stop(){
-    pid=`cat $PIDFILE 2>/dev/null`;
-    kill $pid >/dev/null 2>&1;
+#   pid=`cat $PIDFILE 2>/dev/null`;
+#   kill $pid >/dev/null 2>&1;
+    killall redsocks2
 }
 
 case "$1" in
