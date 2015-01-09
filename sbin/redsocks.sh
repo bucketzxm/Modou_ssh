@@ -2,6 +2,10 @@
 
 CURWDIR=$(cd $(dirname $0) && pwd)
 
+REDSOCKSBIN="$CURWDIR/../bin/redsocks2"
+REDSOCKSCONF="$CURWDIR/../conf/redsocks.conf"
+REDSOCKSPID="$CURWDIR/../conf/redsocks.pid"
+
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CURDIR/lib
 
 usage()
@@ -12,7 +16,12 @@ usage()
 }
 
 start(){
+    $REDSOCKSBIN -c $REDSOCKSCONF -p $REDSOCKSPID
+}
 
+stop(){
+    pid=`cat $PIDFILE 2>/dev/null`;
+    kill $pid >/dev/null 2>&1;
 }
 
 case "$1" in
