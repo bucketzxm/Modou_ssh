@@ -2,11 +2,17 @@
 
 CURWDIR=$(cd $(dirname $0) && pwd)
 
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CURDIR/lib
+
 usage()
 {
     echo "ERROR: action missing"
     echo "syntax: $0 <start|stop>"
     echo "example: $0 start"
+}
+
+start(){
+
 }
 
 case "$1" in
