@@ -56,7 +56,9 @@ genIptablesRule()
     fi
     echo "" >> $IPTABLESRULE
     # redirect to socket proxy prot
-    echo "-A SSH -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    #echo "-A SSH -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    echo "-A SSH -p tcp --dport 80 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
+    echo "-A SSH -p tcp --dport 443 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
     # redirect pdns tcp connect to local port
     echo "-A PDNSD -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
     echo "COMMIT" >> $IPTABLESRULE
@@ -74,7 +76,7 @@ IptablesAdd()
 genRule()
 {
     IptablesClear;
-    genDefaultRule;
+    #genDefaultRule;
     genIptablesRule;    
 }
 
