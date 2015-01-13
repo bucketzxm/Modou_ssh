@@ -1,9 +1,9 @@
 #!/bin/sh
 
 server=$2
-port=$3
-user=$4
-password=$5
+#port=$3
+user=$3
+password=$4
 
 CURWDIR=$(cd $(dirname $0) && pwd)
 CUSTOMCONF="$CURWDIR/../conf/custom.conf"
@@ -201,12 +201,22 @@ starttp()
     return 0;
 }
 start(){
-	server=`/system/sbin/json4sh.sh "get" $DATAJSON service_ip_address value`
-	port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
-	user=`/system/sbin/json4sh.sh "get" $DATAJSON user value`
-	password=`/system/sbin/json4sh.sh "get" $DATAJSON password_ssh value`	
+	
+	if [ ! $server ]; then
+		server=`/system/sbin/json4sh.sh "get" $DATAJSON service_ip_address value`
+	fi
+	if [ ! $port ]; then
+		port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
+	fi
+	if [ ! user ]; then
+		user=`/system/sbin/json4sh.sh "get" $DATAJSON user value`
+	fi
+	if [ ! password ]; then
+		password=`/system/sbin/json4sh.sh "get" $DATAJSON password_ssh value`	
+	fi
     export OPENSSH_PASSWORD=$password
-    SSHFLAG="-N -D *:1080 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
+    #SSHFLAG="-N -D *:1080 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
+	SSHFLAG="-N -D *:1080 $user@$server -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG
     return 0;
 }
