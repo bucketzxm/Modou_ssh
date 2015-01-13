@@ -127,7 +127,7 @@ startRedSocks()
 	# Redirect normal HTTP and HTTPS traffic
 	iptables -t nat -A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports 11111
 	iptables -t nat -A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports 11111
-	$CURWDIR/../bin/redsocks;
+	$CURWDIR/../bin/redsocks2;
 
 }
 
@@ -218,6 +218,8 @@ start(){
     #SSHFLAG="-N -D *:1080 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
 	SSHFLAG="-N -D *:1080 $user@$server -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG
+	genRedSocksConfig
+	startRedSocks
     return 0;
 }
 
