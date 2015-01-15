@@ -1,9 +1,9 @@
 #!/bin/sh
 
 server=$2
-#port=$3
-user=$3
-password=$4
+port=$3
+user=$4
+password=$5
 
 CURWDIR=$(cd $(dirname $0) && pwd)
 CUSTOMCONF="$CURWDIR/../conf/custom.conf"
@@ -18,8 +18,6 @@ DATAJSON="$CURWDIR/../conf/data.json"
 PIDFILE="$CURWDIR/../conf/autossh.pid"
 #local network proxy
 SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
-#localhost proxy
-#SSHFLAG="$CURWDIR/../bin/ssh -ND 1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
 AUTOSSHBIN="$CURWDIR/../bin/autossh -f"
 
 # set autossh Env var
@@ -27,6 +25,7 @@ export AUTOSSH_GATETIME="30"
 export AUTOSSH_POLL="600"
 export AUTOSSH_PATH="$CURWDIR/../bin/sshp"
 export AUTOSSH_PIDFILE=$PIDFILE
+export AUTOSSH_DEBUG=1
 export OPENSSH_PASSWORD=$password
 
 CMDHEAD='"cmd":"'
@@ -53,15 +52,15 @@ config()
     
     server=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
     port=`head -n 2 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-	user=`head -n 3 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    user=`head -n 3 $CUSTOMSETCONF | cut -d ' ' -f2-`;
     password=`head -n 4 $CUSTOMSETCONF | cut -d ' ' -f2-`;
     
-	#命令中用的是port,user,server,这里直接重新赋值一下
+    #命令中用的是port,user,server,这里直接重新赋值一下
 
 
     /system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $server
     /system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $port
-	/system/sbin/json4sh.sh "set" $DATAJSON user value $user
+    /system/sbin/json4sh.sh "set" $DATAJSON user value $user
     /system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $password
 
     return 0;
@@ -71,42 +70,42 @@ config()
 REDSOCKSCONF="$CURWDIR/../conf/redsocks.conf"
 genRedSocksConfig()
 {
-	
+    
 
-	server=`/system/sbin/json4sh.sh "get" $DATAJSON server_ip_address value`
-	port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
-	user=`/system/sbin/json4sh.sh "get" $DATAJSON user value`
-	password=`/system/sbin/json4sh.sh "get" $DATAJSON password_ssh value`
+    server=`/system/sbin/json4sh.sh "get" $DATAJSON server_ip_address value`
+    port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
+    user=`/system/sbin/json4sh.sh "get" $DATAJSON user value`
+    password=`/system/sbin/json4sh.sh "get" $DATAJSON password_ssh value`
 
-	echo '
+    echo '
 
-		base{
-			log_debug=off;
-			log_info=off;
-			log="file:
-	' >$REDSOCKSCONF
+        base{
+            log_debug=off;
+            log_info=off;
+            log="file:
+    ' >$REDSOCKSCONF
 
-	$REDSOCKSCONF >> $REDSOCKSCONF;
-	echo ';' >> $REDSOCKSCONF
-	echo '
-			
-			daemon=on;
-			redirector=iptables;
-			}	
-	' >> $REDSOCKSCONF
-	
-	echo '
-		redsocks {
-			local_ip = 192.168.1.1;
-			local_port = 
-	' >> $REDSOCKSCONF
-	$port >> $REDSOCKSCONF
-	echo ';' >>$REDSOCKSCONF
-	echo '
-		type=socks5;
-		autoproxy=1;
-		timeout=5;
-	'
+    $REDSOCKSCONF >> $REDSOCKSCONF;
+    echo ';' >> $REDSOCKSCONF
+    echo '
+            
+            daemon=on;
+            redirector=iptables;
+            }   
+    ' >> $REDSOCKSCONF
+    
+    echo '
+        redsocks {
+            local_ip = 192.168.1.1;
+            local_port = 
+    ' >> $REDSOCKSCONF
+    $port >> $REDSOCKSCONF
+    echo ';' >>$REDSOCKSCONF
+    echo '
+        type=socks5;
+        autoproxy=1;
+        timeout=5;
+    '
 
 
 
@@ -114,20 +113,20 @@ genRedSocksConfig()
 
 startRedSocks()
 {
-	iptables -t nat -N REDSOCKS
-	iptables -t nat -A PREROUTING -i br-lan -p tcp -j REDSOCKS
+    iptables -t nat -N REDSOCKS
+    iptables -t nat -A PREROUTING -i br-lan -p tcp -j REDSOCKS
 
-	#do not redirect traffic to the followign address ranges
-	iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -j RETURN
-	iptables -t nat -A REDSOCKS -d 192.18.0.0/16 -j RETURN
-	iptables -t nat -A REDSOCKS -d 10.8.0.0/16 -j RETURN
-	iptables -t nat -A REDSOCKS -d 224.0.0.0/4 -j RETURN
-	iptables -t nat -A REDSOCKS -d 240.0.0.0/4 -j RETURN
+    #do not redirect traffic to the followign address ranges
+    iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -j RETURN
+    iptables -t nat -A REDSOCKS -d 192.18.0.0/16 -j RETURN
+    iptables -t nat -A REDSOCKS -d 10.8.0.0/16 -j RETURN
+    iptables -t nat -A REDSOCKS -d 224.0.0.0/4 -j RETURN
+    iptables -t nat -A REDSOCKS -d 240.0.0.0/4 -j RETURN
 
-	# Redirect normal HTTP and HTTPS traffic
-	iptables -t nat -A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports 11111
-	iptables -t nat -A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports 11111
-	$CURWDIR/../bin/redsocks2;
+    # Redirect normal HTTP and HTTPS traffic
+    iptables -t nat -A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports 11111
+    iptables -t nat -A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports 11111
+    $CURWDIR/../bin/redsocks2;
 
 }
 
@@ -201,25 +200,25 @@ starttp()
     return 0;
 }
 start(){
-	
-	if [ ! $server ]; then
-		server=`/system/sbin/json4sh.sh "get" $DATAJSON service_ip_address value`
-	fi
-	if [ ! $port ]; then
-		port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
-	fi
-	if [ ! user ]; then
-		user=`/system/sbin/json4sh.sh "get" $DATAJSON user value`
-	fi
-	if [ ! password ]; then
-		password=`/system/sbin/json4sh.sh "get" $DATAJSON password_ssh value`	
-	fi
+    
+    if [ ! $server ]; then
+        server=`/system/sbin/json4sh.sh get $DATAJSON service_ip_address value`
+    fi
+    if [ ! $port ]; then
+        port=`/system/sbin/json4sh.sh get $DATAJSON port_ssh value`
+    fi
+    if [ ! $user ]; then
+        user=`/system/sbin/json4sh.sh get $DATAJSON user value`
+    fi
+    if [ ! $password ]; then
+        password=`/system/sbin/json4sh.sh get $DATAJSON password_ssh value`   
+    fi
     export OPENSSH_PASSWORD=$password
     #SSHFLAG="-N -D *:1080 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
-	SSHFLAG="-N -D *:1080 $user@$server -F $CURWDIR/../conf/ssh_config"
+    SSHFLAG="-N -D *:1080 $user@$server -v -p $port -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG
-	genRedSocksConfig
-	startRedSocks
+    #genRedSocksConfig
+    #startRedSocks
     return 0;
 }
 
