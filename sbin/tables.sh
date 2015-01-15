@@ -22,9 +22,9 @@ IptablesClear()
     iptables -t nat -F PDNSD
     iptables -t nat -D OUTPUT -p tcp -j PDNSD
     iptables -t nat -X PDNSD
-    iptables -t nat -F SSH
-    iptables -t nat -D PREROUTING -i br-lan -p tcp -j SSH
-    iptables -t nat -X SSH
+    iptables -t nat -F REDSOCKS
+    iptables -t nat -D PREROUTING -i br-lan -p tcp -j REDSOCKS
+    iptables -t nat -X REDSOCKS
 }
 
 genDefaultRule()
@@ -33,9 +33,9 @@ genDefaultRule()
     if [ ! -f "$DEFAULTLIST" ]; then
         return 0
     fi
-    # add all rule to SSH Chain
+    # add all rule to REDSOCKS Chain
     for lines in `cat $DEFAULTLIST`; do
-        echo "-A SSH -d $lines -j RETURN" >> $DEFAULTWHITE
+        echo "-A REDSOCKS -d $lines -j RETURN" >> $DEFAULTWHITE
     done
     return 0
 }
@@ -56,9 +56,9 @@ genIptablesRule()
     fi
     echo "" >> $IPTABLESRULE
     # redirect to socket proxy prot
-    #echo "-A SSH -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
-    echo "-A SSH -p tcp --dport 80 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
-    echo "-A SSH -p tcp --dport 443 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
+    echo "-A REDSOCKS -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    #echo "-A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
+    #echo "-A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
     # redirect pdns tcp connect to local port
     echo "-A PDNSD -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
     echo "COMMIT" >> $IPTABLESRULE

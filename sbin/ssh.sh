@@ -217,7 +217,7 @@ start(){
     fi
     export OPENSSH_PASSWORD=$password
     #SSHFLAG="-N -D *:1080 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
-    SSHFLAG="-N -D *:1080 $user@$server -p $port -F $CURWDIR/../conf/ssh_config"
+    SSHFLAG="-N -D *:1080 $user@$server -v -p $port -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG > $SSHLOG 2>&1 &
     #genRedSocksConfig
     #startRedSocks
