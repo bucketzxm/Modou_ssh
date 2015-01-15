@@ -76,7 +76,7 @@ IptablesAdd()
 genRule()
 {
     IptablesClear;
-    #genDefaultRule;
+    genDefaultRule;
     genIptablesRule;    
 }
 
