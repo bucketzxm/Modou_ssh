@@ -12,20 +12,22 @@ CUSTOMBIN="/system/apps/tp/bin/custom"
 CUSTOMSETCONF="$CURWDIR/../conf/customset.conf"
 SETCONF="$CURWDIR/../conf/set.conf"
 DATAJSON="$CURWDIR/../conf/data.json"
+
+SSHLOG="$CURWDIR/../ssh.log"
+
 # 生成密码配置文件
 [ ! -f $CUSTOMSETCONF ] && cp $SETCONF  $CUSTOMSETCONF
 
 PIDFILE="$CURWDIR/../conf/autossh.pid"
 #local network proxy
 SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
-AUTOSSHBIN="$CURWDIR/../bin/autossh -f"
+AUTOSSHBIN="$CURWDIR/../bin/autossh"
 
 # set autossh Env var
 export AUTOSSH_GATETIME="30"
 export AUTOSSH_POLL="600"
 export AUTOSSH_PATH="$CURWDIR/../bin/sshp"
 export AUTOSSH_PIDFILE=$PIDFILE
-export AUTOSSH_DEBUG=1
 export OPENSSH_PASSWORD=$password
 
 CMDHEAD='"cmd":"'
@@ -215,8 +217,8 @@ start(){
     fi
     export OPENSSH_PASSWORD=$password
     #SSHFLAG="-N -D *:1080 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
-    SSHFLAG="-N -D *:1080 $user@$server -v -p $port -F $CURWDIR/../conf/ssh_config"
-    $AUTOSSHBIN -M 7000 $SSHFLAG
+    SSHFLAG="-N -D *:1080 $user@$server -p $port -F $CURWDIR/../conf/ssh_config"
+    $AUTOSSHBIN -M 7000 $SSHFLAG > $SSHLOG 2>&1 &
     #genRedSocksConfig
     #startRedSocks
     return 0;
