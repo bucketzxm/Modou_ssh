@@ -195,6 +195,25 @@ genCustomConfig()
 
 }
 
+checkProcessStatusByName()
+{
+	local $processname=$1
+	local status=`ps | grep $precessname | wc -l`
+	if [ $status == "1" ]; then
+		echo "dead";
+	else
+		echo "alive";
+	fi
+	return 0;
+
+}
+
+checkStatus()
+{
+	isserverstart=`checkProcessStatusByName $processname`
+
+}
+
 starttp()
 {
     genCustomConfig
