@@ -53,9 +53,9 @@ config()
     generate-config-file $CUSTOMSETCONF 
     
     server=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-    port=`head -n 2 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-    user=`head -n 3 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-    password=`head -n 4 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    port=`head -n 2 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
+    user=`head -n 3 $CUSTOMSETCONF | tail -n 1 |  cut -d ' ' -f2-`;
+    password=`head -n 4 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
     
     #命令中用的是port,user,server,这里直接重新赋值一下
 
@@ -72,7 +72,6 @@ config()
 REDSOCKSCONF="$CURWDIR/../conf/redsocks.conf"
 genRedSocksConfig()
 {
-    
 
     server=`/system/sbin/json4sh.sh "get" $DATAJSON server_ip_address value`
     port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
@@ -139,7 +138,8 @@ genCustomConfig()
         "title" : "ssh vpn",
     ' > $CUSTOMCONF
 
-	local content=`genCustomContentByName "ssh"`
+	local content=`genCustomContentByName "ssh" "insertinfo"`
+	echo $content >> $CUSTOMCONF
     echo '
         
         "button1": {
@@ -183,8 +183,8 @@ genCustomConfig()
     echo '
         "txt" : "配置",
         "code": {
-            "0": "loading",
-            "-1": "exec failed"
+            "0": "",
+            "-1": "配置文件空"
         }
 
     }
@@ -199,7 +199,7 @@ genCustomConfig()
 checkProcessStatusByName()
 {
 	local $processname=$1
-	local status=`ps | grep $precessname | wc -l`
+	local status=`ps | grep $processname | wc -l`
 	if [ $status == "1" ]; then
 		echo "dead";
 	else
@@ -209,22 +209,23 @@ checkProcessStatusByName()
 
 }
 
+
 genCustomContentByName()
 {
     [ "$#" != "2" ] && return 1;
 	local processname="$1"
 	local isinsertinfo="$2"
-	local contenthead='"content:"'
-	local contenttail='","'
+	local contenthead='"content":"'
+	local contenttail='",'
 	local contentbody=""
 	local linetag="\n"
 
 	isserverstart=`checkProcessStatusByName $processname`
 
 	if [ "$isserverstart" == "alive" ]; then
-		contentbody="Service is on"
+		contentbody="ssh is running"
 	else
-		contentbody="Service is down"
+		contentbody="ssh is not running"
 	fi
 
 	if [ "$isinsertinfo" == "insertinfo" ]; then
@@ -235,7 +236,8 @@ genCustomContentByName()
 			line=`head -n $count $CUSTOMSETCONF | tail -n 1`
 			configcontent=${configcontent}${line}${linetag}
 		done
-		contentbody=${contentbody}${contentbody}${contenttail}
+		contentbody=${contentbody}${linetag}${configcontent}
+		
 	fi
 	echo ${contenthead}${contentbody}${contenttail}
 	return 0;
@@ -273,6 +275,7 @@ start(){
 stop(){
     pid=`cat $PIDFILE 2>/dev/null`;
     kill $pid >/dev/null 2>&1;
+    return 0
 }
 
 case "$1" in
