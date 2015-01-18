@@ -226,6 +226,19 @@ genCustomContentByName()
 	else
 		contentbody="Service is down"
 	fi
+
+	if [ "$isinsertinfo" == "insertinfo" ]; then
+		local counts=`cat $CUSTOMSETCONF | wc -l`
+		local configcontent=""
+		for count in $(seq $counts)
+		do
+			line=`head -n $count $CUSTOMSETCONF | tail -n 1`
+			configcontent=${configcontent}${line}${linetag}
+		done
+		contentbody=${contentbody}${contentbody}${contenttail}
+	fi
+	echo ${contenthead}${contentbody}${contenttail}
+	return 0;
 }
 
 
