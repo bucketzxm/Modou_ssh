@@ -139,6 +139,7 @@ genCustomConfig()
         "title" : "ssh vpn",
     ' > $CUSTOMCONF
 
+	local content=`genCustomContentByName "ssh"`
     echo '
         
         "button1": {
@@ -208,11 +209,25 @@ checkProcessStatusByName()
 
 }
 
-checkStatus()
+genCustomContentByName()
 {
+    [ "$#" != "2" ] && return 1;
+	local processname="$1"
+	local isinsertinfo="$2"
+	local contenthead='"content:"'
+	local contenttail='","'
+	local contentbody=""
+	local linetag="\n"
+
 	isserverstart=`checkProcessStatusByName $processname`
 
+	if [ "$isserverstart" == "alive" ]; then
+		contentbody="Service is on"
+	else
+		contentbody="Service is down"
+	fi
 }
+
 
 starttp()
 {
