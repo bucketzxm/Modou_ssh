@@ -8,7 +8,7 @@
     "user":{
         "type":{"min":1,"class":"STRING","max":32},
         "name":"用户名","id":"user",
-        "value":"",
+        "value":"username",
         "group_id":"main_info_display"
     },
     "service_ip_address":{
@@ -25,7 +25,8 @@
     },
     "password_ssh":{
         "type":{"min":6,"class":"PASSWORD","max":30},
-        "name":"密码","id":"password_ssh","value":"password",
+        "name":"密码","id":"password_ssh",
+        "value":"password",
         "group_id":"main_info_display"
     }
 }
