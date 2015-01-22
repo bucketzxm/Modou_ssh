@@ -13,7 +13,9 @@ CUSTOMSETCONF="$CURWDIR/../conf/customset.conf"
 SETCONF="$CURWDIR/../conf/set.conf"
 DATAJSON="$CURWDIR/../conf/data.json"
 
-SSHLOG="$CURWDIR/../ssh.log"
+ROTATELOGS="$CURWDIR/../bin/rotatelogs"
+LOG="$CURWDIR/../ssh.log 100K"
+ROTATELOGSFLAG="-t"
 
 # 生成密码配置文件
 [ ! -f $CUSTOMSETCONF ] && cp $SETCONF  $CUSTOMSETCONF
@@ -266,7 +268,7 @@ start(){
     fi
     export OPENSSH_PASSWORD=$password
     SSHFLAG="-N -D *:1080 $user@$server -p $port -F $CURWDIR/../conf/ssh_config"
-    $AUTOSSHBIN -M 7000 $SSHFLAG > $SSHLOG 2>&1 &
+    $AUTOSSHBIN -M 7000 $SSHFLAG 2>&1 | $ROTATELOGS $ROTATELOGSFLAG $LOG &
     #genRedSocksConfig
     #startRedSocks
     return 0;

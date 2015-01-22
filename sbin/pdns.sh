@@ -18,7 +18,7 @@ delConfDir() {
 }
 
 dnsReload() {
-    /etc/init.d/dnsmasq reload
+    /etc/init.d/dnsmasq reload &
 }
 
 pdnsStart(){

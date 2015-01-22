@@ -2,9 +2,13 @@
 
 CURWDIR=$(cd $(dirname $0) && pwd)
 
-REDSOCKSBIN="$CURWDIR/../bin/redsocks2"
+REDSOCKSBIN="$CURWDIR/../bin/redsocks"
 REDSOCKSCONF="$CURWDIR/../conf/redsocks.conf"
 PIDFILE="$CURWDIR/../conf/redsocks.pid"
+ROTATELOGS="$CURWDIR/../bin/rotatelogs"
+LOG="$CURWDIR/../redsocks.log 100K"
+ROTATELOGSFLAG="-t"
+#ROTATELOGSFLAG="-t -p $CURWDIR/s.sh"
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CURWDIR/../lib
 
@@ -16,13 +20,13 @@ usage()
 }
 
 start(){
-    $REDSOCKSBIN -c $REDSOCKSCONF -p $PIDFILE
+    $REDSOCKSBIN -c $REDSOCKSCONF -p $PIDFILE 2>&1 | $ROTATELOGS $ROTATELOGSFLAG $LOG &
 }
 
 stop(){
 #   pid=`cat $PIDFILE 2>/dev/null`;
 #   kill $pid >/dev/null 2>&1;
-    killall redsocks2
+    killall redsocks
 }
 
 case "$1" in
