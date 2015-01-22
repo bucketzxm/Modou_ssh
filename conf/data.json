@@ -1,1 +1,32 @@
-{"port_ssh":{"type":{"min":10,"class":"INT","max":9999999},"name":"端口号","id":"port_ssh","value":"172.246.118.162","group_id":"main_info_display"},"user":{"type":{"min":1,"class":"STRING","max":32},"name":"用户名","id":"user","value":"172.246.118.162","group_id":"main_info_display"},"service_ip_address":{"type":{"min":7,"class":"STRING","max":15},"name":"服务地址","id":"service_ip_address","value":"172.246.118.162","group_id":"main_info_display"},"state_ssh":{"type":{"class":"BOOL"},"name":"状态","id":"state_ssh","value":false,"group_id":"main_info_display"},"password_ssh":{"type":{"min":6,"class":"PASSWORD","max":30},"name":"密码","id":"password_ssh","value":"172.246.118.162","group_id":"main_info_display"}}
+{
+    "port_ssh":{
+        "type":{"min":10,"class":"INT","max":9999999},
+        "name":"端口号","id":"port_ssh",
+        "value":"22",
+        "group_id":"main_info_display"
+    },
+    "user":{
+        "type":{"min":1,"class":"STRING","max":32},
+        "name":"用户名","id":"user",
+        "value":"username",
+        "group_id":"main_info_display"
+    },
+    "service_ip_address":{
+        "type":{"min":7,"class":"STRING","max":15},
+        "name":"服务地址","id":"service_ip_address",
+        "value":"0.0.0.0",
+        "group_id":"main_info_display"
+    },
+    "state_ssh":{
+        "type":{"class":"BOOL"},
+        "name":"状态","id":"state_ssh",
+        "value":false,
+        "group_id":"main_info_display"
+    },
+    "password_ssh":{
+        "type":{"min":6,"class":"PASSWORD","max":30},
+        "name":"密码","id":"password_ssh",
+        "value":"password",
+        "group_id":"main_info_display"
+    }
+}
