@@ -1,6 +1,6 @@
 :PDNSD - [0:0]
 :REDSOCKS - [0:0]
--A PREROUTING -i br-lan -p tcp -j REDSOCKS
+-I PREROUTING -p tcp -j REDSOCKS
 -A OUTPUT -p tcp -j PDNSD
 -A REDSOCKS -d 0.0.0.0/8 -j RETURN
 -A REDSOCKS -d 127.0.0.0/8 -j RETURN

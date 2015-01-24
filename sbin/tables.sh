@@ -23,7 +23,7 @@ IptablesClear()
     iptables -t nat -D OUTPUT -p tcp -j PDNSD
     iptables -t nat -X PDNSD
     iptables -t nat -F REDSOCKS
-    iptables -t nat -D PREROUTING -i br-lan -p tcp -j REDSOCKS
+    iptables -t nat -D PREROUTING -p tcp -j REDSOCKS
     iptables -t nat -X REDSOCKS
 }
 
