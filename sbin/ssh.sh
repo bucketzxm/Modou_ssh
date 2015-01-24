@@ -5,25 +5,26 @@ port=$3
 user=$4
 password=$5
 
+CURWDIR=$(cd $(dirname $0) && pwd)
+
 # app information
 PACKAGEID="com.modouwifi.vpnssh"
 
-CURWDIR=$(cd $(dirname $0) && pwd)
-CUSTOMCONF="$CURWDIR/../conf/custom.conf"
-CUSTOMBIN="/system/apps/tp/bin/custom"
-CUSTOMPIDFILE="$CURDIR/../conf/custom.pid"
+# since the app framework bug
+[ -f $CURWDIR/../data ] && rm $CURWDIR/../data
+[ ! -d $CURWDIR/../data/ ] && mkdir $CURWDIR/../data/
 
-CUSTOMSETCONF="$CURWDIR/../conf/customset.conf"
+# prepare the config file for "generate-config-file" component
+CUSTOMSETCONF="$CURWDIR/../data/customset.conf"
 SETCONF="$CURWDIR/../conf/set.conf"
-DATAJSON="$CURWDIR/../conf/data.json"
+[ ! -f $CUSTOMSETCONF ] && cp $SETCONF $CUSTOMSETCONF
 
+# prepare for rotatelogs
 ROTATELOGS="$CURWDIR/../bin/rotatelogs"
 LOG="$CURWDIR/../ssh.log 100K"
 ROTATELOGSFLAG="-t"
 
-# 生成密码配置文件
-[ ! -f $CUSTOMSETCONF ] && cp $SETCONF  $CUSTOMSETCONF
-
+# prepare for autossh
 PIDFILE="$CURWDIR/../conf/autossh.pid"
 #local network proxy
 SSHFLAG="-N -D *:1090 -p $port $user@$server -F $CURWDIR/../conf/ssh_config"
@@ -36,104 +37,25 @@ export AUTOSSH_PATH="$CURWDIR/../bin/sshp"
 export AUTOSSH_PIDFILE=$PIDFILE
 export OPENSSH_PASSWORD=$password
 
+# prepare and update the config file for "custom" component
+CUSTOMCONF="$CURWDIR/../conf/custom.conf"
+CUSTOMBIN="/system/apps/tp/bin/custom"
+CUSTOMPIDFILE="$CURWDIR/../conf/custom.pid"
 CMDHEAD='"cmd":"'
 CMDTAIL='",'
 SHELLBUTTON1="$CURWDIR/../sbin/ssh.sh config"
 SHELLBUTTON2="$CURWDIR/../sbin/ssh.sh start"
 SHELLBUTTON22="$CURWDIR/../sbin/ssh.sh stop"
-
 CMDBUTTON1=${CMDHEAD}${SHELLBUTTON1}${CMDTAIL}
 CMDBUTTON2=${CMDHEAD}${SHELLBUTTON2}${CMDTAIL}
 CMDBUTTON22=${CMDHEAD}${SHELLBUTTON22}${CMDTAIL}
 
+DATAJSON="$CURWDIR/../conf/data.json"
 usage()
 {
     echo "ERROR: action missing"
     echo "syntax: $0 <start|stop|genrule|starttp|config> server port username password"
     echo "example: $0 starttp"
-}
-
-
-config()
-{
-    generate-config-file $CUSTOMSETCONF
-
-    server=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
-    port=`head -n 2 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
-    user=`head -n 3 $CUSTOMSETCONF | tail -n 1 |  cut -d ' ' -f2-`;
-    password=`head -n 4 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
-
-    #命令中用的是port,user,server,这里直接重新赋值一下
-
-    /system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $server
-    /system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $port
-    /system/sbin/json4sh.sh "set" $DATAJSON user value $user
-    /system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $password
-
-    genCustomConfig;
-    pid=`cat $CUSTOMPIDFILE 2>/dev/null`;
-    kill -SIGUSR1 $pid >/dev/null 2>&1;
-    return 0;
-}
-
-
-REDSOCKSCONF="$CURWDIR/../conf/redsocks.conf"
-genRedSocksConfig()
-{
-
-    server=`/system/sbin/json4sh.sh "get" $DATAJSON server_ip_address value`
-    port=`/system/sbin/json4sh.sh "get" $DATAJSON port_ssh value`
-    user=`/system/sbin/json4sh.sh "get" $DATAJSON user value`
-    password=`/system/sbin/json4sh.sh "get" $DATAJSON password_ssh value`
-
-    echo '
-
-        base{
-            log_debug=off;
-            log_info=off;
-            log="file:
-    ' >$REDSOCKSCONF
-
-    $REDSOCKSCONF >> $REDSOCKSCONF;
-    echo ';' >> $REDSOCKSCONF
-    echo '
-
-            daemon=on;
-            redirector=iptables;
-            }
-    ' >> $REDSOCKSCONF
-
-    echo '
-        redsocks {
-            local_ip = 192.168.1.1;
-            local_port =
-    ' >> $REDSOCKSCONF
-    $port >> $REDSOCKSCONF
-    echo ';' >>$REDSOCKSCONF
-    echo '
-        type=socks5;
-        autoproxy=1;
-        timeout=5;
-    '
-}
-
-startRedSocks()
-{
-    iptables -t nat -N REDSOCKS
-    iptables -t nat -A PREROUTING -i br-lan -p tcp -j REDSOCKS
-
-    #do not redirect traffic to the followign address ranges
-    iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -j RETURN
-    iptables -t nat -A REDSOCKS -d 192.18.0.0/16 -j RETURN
-    iptables -t nat -A REDSOCKS -d 10.8.0.0/16 -j RETURN
-    iptables -t nat -A REDSOCKS -d 224.0.0.0/4 -j RETURN
-    iptables -t nat -A REDSOCKS -d 240.0.0.0/4 -j RETURN
-
-    # Redirect normal HTTP and HTTPS traffic
-    iptables -t nat -A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports 11111
-    iptables -t nat -A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports 11111
-    $CURWDIR/../bin/redsocks2;
-
 }
 
 genCustomConfig()
@@ -147,7 +69,7 @@ genCustomConfig()
         "title" : "SSH VPN",
     ' > $CUSTOMCONF
 
-	  local content=`genCustomContentByName "ssh" "insertinfo" $CUSTOMSETCONF`
+	  local content=`genCustomContentByName "autossh" "insertinfo" $CUSTOMSETCONF`
 	  echo $content >> $CUSTOMCONF
     echo '
         "button1": {
@@ -159,7 +81,7 @@ genCustomConfig()
             },
         "button2": {
     ' >>$CUSTOMCONF
-    local isserverstart=`checkProcessStatusByName "ssh"`
+    local isserverstart=`checkProcessStatusByName "autossh"`
     if [ "$isserverstart" == "alive" ]; then
         echo $CMDBUTTON22 >> $CUSTOMCONF
         echo '
@@ -181,7 +103,7 @@ genCustomConfig()
 
 checkProcessStatusByName()
 {
-	local $processname=$1
+	local processname=$1
 	local status=`ps | grep $processname | wc -l`
 	if [ $status == "1" ]; then
 		echo "dead";
@@ -227,11 +149,10 @@ genCustomContentByName()
     return 0;
 }
 
-
 starttp()
 {
     genCustomConfig
-    $CUSTOMBIN $CUSTOMCONF
+    $CUSTOMBIN $CUSTOMCONF &
     echo $! > $CUSTOMPIDFILE
     return 0;
 }
@@ -252,10 +173,10 @@ start(){
     export OPENSSH_PASSWORD=$password
     SSHFLAG="-N -D *:1080 $user@$server -p $port -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG 2>&1 | $ROTATELOGS $ROTATELOGSFLAG $LOG &
-    genRedSocksConfig
-    $CURDIR/../sbin/pdns.sh start
-    $CURDIR/../sbin/redsocks.sh start
-    $CURDIR/../sbin/tables.sh start
+    #genRedSocksConfig
+    $CURWDIR/../sbin/pdns.sh start
+    $CURWDIR/../sbin/redsocks.sh start
+    $CURWDIR/../sbin/tables.sh start
     sleep 1
     genCustomConfig;
     local pid=`cat $CUSTOMPIDFILE 2>/dev/null`;
@@ -267,9 +188,9 @@ start(){
 stop(){
     pid=`cat $PIDFILE 2>/dev/null`;
     kill $pid >/dev/null 2>&1;
-    $CURDIR/../sbin/pdns.sh stop
-    $CURDIR/../sbin/redsocks.sh stop
-    $CURDIR/../sbin/tables.sh stop
+    $CURWDIR/../sbin/pdns.sh stop
+    $CURWDIR/../sbin/redsocks.sh stop
+    $CURWDIR/../sbin/tables.sh stop
 
     sleep 1
     genCustomConfig;
@@ -279,6 +200,89 @@ stop(){
     return 0
 }
 
+config()
+{
+    generate-config-file $CUSTOMSETCONF
+    server=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    port=`head -n 2 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
+    user=`head -n 3 $CUSTOMSETCONF | tail -n 1 |  cut -d ' ' -f2-`;
+    password=`head -n 4 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
+
+    #命令中用的是port,user,server,这里直接重新赋值一下
+    /system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $server
+    /system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $port
+    /system/sbin/json4sh.sh "set" $DATAJSON user value $user
+    /system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $password
+
+    local isserverstart=`checkProcessStatusByName "autossh"`
+    if [ "$isserverstart" == "alive" ]; then
+        /system/sbin/json4sh.sh "set" $DATAJSON state_ssh value true
+    else
+        /system/sbin/json4sh.sh "set" $DATAJSON state_ssh value false
+    fi
+    genCustomConfig;
+    pid=`cat $CUSTOMPIDFILE 2>/dev/null`;
+    kill -SIGUSR1 $pid >/dev/null 2>&1;
+    return 0;
+}
+
+syncConfigFromDataToTp()
+{
+    local server=`/system/sbin/json4sh.sh get $DATAJSON service_ip_address value`
+    local port=`/system/sbin/json4sh.sh get $DATAJSON port_ssh value`
+    local user=`/system/sbin/json4sh.sh get $DATAJSON user value`
+    local password=`/system/sbin/json4sh.sh get $DATAJSON password_ssh value`
+    if [ "$server" == "" ]; then
+        server="0.0.0.0"
+    fi
+    if [ "$port" == "" ]; then
+        port=0
+    fi
+    if [ "$user" == "" ]; then
+        user="未设置"
+    fi
+    if [ "$password" == "" ]; then
+        password="未设置"
+    fi
+    # FIXME
+    echo "服务地址: $server
+端口号: $port
+用户名: $user
+密码: $password" > $CUSTOMSETCONF
+}
+
+syncConfigFromTpToData()
+{
+    local server=`head -n 1 $CUSTOMSETCONF | cut -d ' ' -f2-`;
+    local port=`head -n 2 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
+    local user=`head -n 3 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
+    local password=`head -n 4 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
+    if [ "$server" == "" ]; then
+        serveraddr="0.0.0.0"
+    fi
+    if [ "$port" == "" ]; then
+        serverport=0
+    fi
+    if [ "$user" == "" ]; then
+        secmode="未设置"
+    fi
+    if [ "$password" == "" ]; then
+        passwd="未设置"
+    fi
+
+    /system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $server
+    /system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $port
+    /system/sbin/json4sh.sh "set" $DATAJSON user value $user
+    /system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $password
+    local isserverstart=`checkProcessStatusByName "autossh"`
+    if [ "$isserverstart" == "alive" ]; then
+        /system/sbin/json4sh.sh "set" $DATAJSON state_ssh value true
+    else
+        /system/sbin/json4sh.sh "set" $DATAJSON state_ssh value false
+    fi
+    return 0
+
+}
 case "$1" in
 
     "stop" )
@@ -311,6 +315,14 @@ case "$1" in
         ;;
     "config" ):
         config;
+        exit 0;
+        ;;
+    "syncConfig" ):
+        syncConfigFromDataToTp;
+        exit 0;
+        ;;
+    "restoreConfig")
+        syncConfigFromTpToData;
         exit 0;
         ;;
 
