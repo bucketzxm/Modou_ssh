@@ -1,82 +1,25 @@
 {
-    "main_page_ssh":{
-        "id" : "main_page_ssh",
-		"name" : "魔豆ssh",
-		"type" : "main",
-		"data" : {
-            "state_ssh":{
-                "id" : "status",
-				"access" : "RO",
-			},
-			"service_ip_address" : {
-                "id" : "service_ip_address",
-				"access" : "RO"
-			}
-			"port_ssh" : {
-                "id" : "port_ssh",
-				"access" : "RO",
-
-			}
-			"password_ssh" : {
-				"id" : "password_ssh",
-				"access" : "RO",
-
-			}
-
-		},
-		"menu" : {
-			"1" : {
-	            "index" : 1,
-			    "text"  : "开启服务",
-			    "type"  : "COMMAND",
-			    "action": "start_ssh",
-			    "input" : "params"	
-			},
-			"2" : {
-			  "index" : 2,
-			  "text" : "服务控制",
-			  "type" : "MENU",
-			  "items" : {
-			    "1" : {
-			      "index" : 1,
-			      "text" : "开启服务",
-			      "type" : "COMMAND",
-			      "action" : "start_ssh",
-			      "input" : "params"
-			    },
-			    "2" : {
-			      "index" : 2,
-			      "text" : "关闭服务",
-			      "type" : "COMMAND",
-			      "action" : "stop_ssh",
-			      "input" : "params"
-			    },
-			    "3" : {
-			      "index" : 3,
-			      "text" : "配置账号",
-			      "type" : "VIEW",
-			      "viewid" : "page_account_setting"
-			    }
-			  }
-			},
-		"page_account_setting" : {
-		      "id" : "page_account_setting",
-		      "name" : "配置账号",
-		      "type" : "sub",
-		      "data" : {
-			      "service_ip_address" : {
-		      	      "id" : "service_ip_address",
-			          "access" : "RW"
-			      },
-			      "port_shadow_socks" : {
-			          "id" : "port_ssh",
-			          "access" : "RW"
-			      },
-			      "password_ssh" : {
-			          "id" : "password_ssh",
-			          "access" : "RW"
-			  
-			      }
-			  }
-		}
+  "widgets":
+    [
+      {
+        "id": "state_ssh",
+        "access": "RW"
+      },
+      {
+        "id": "service_ip_address",
+        "access": "RW"
+      },
+      {
+        "id": "port_ssh",
+        "access": "RW"
+      },
+      {
+        "id": "user",
+        "access": "RW"
+      },
+      {
+        "id": "password_ssh",
+        "access": "RW"
+      }
+    ]
 }
