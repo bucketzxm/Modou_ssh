@@ -180,6 +180,38 @@ case "$1" in
         fi
         exit 0;
         ;;
+	"gameMode")
+		genGameRule;
+		IptablesAdd;
+		if [["0" != "$?" ]]; then
+			exit 1;
+		fi
+		exit 0;
+		;;
+	"globalMode")
+		genGlobalRule;
+		IptablesAdd;
+		if [["0" != "$?" ]]; then
+			exit 1;
+		fi
+		exit 0;
+		;;
+	"smartMode")
+		genSmartRule;
+		IptablesAdd;
+		if [["0" != "$?" ]]; then
+			exit 1;
+		fi
+		exit 0;
+		;;
+	"backMode")
+		genBackRule;
+		IptablesAdd;
+		if [["0" != "$?" ]]; then
+			exit 1;
+		fi
+		exit 0;
+		;;
     *)
         usage init;
         exit 1;
