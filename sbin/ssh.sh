@@ -101,15 +101,22 @@ genCustomConfig()
     fi
     echo '
             "code": {"0": "start success", "-1": "执行失败"}
-            }
-    }
+            },
+  	
     ' >> $CUSTOMCONF
 
 	echo '
 		"button3": {
 	' >> $CUSTOMCONF
 
-	
+	echo $CMDBUTTON3 >> $CUSTOMCONF
+	echo '
+		"txt" : "选择模式",
+		"code": {}
+		}
+	}
+
+	'	
     return 0;
 }
 
@@ -212,6 +219,11 @@ stop(){
     return 0
 }
 
+configMode()
+{
+	list -t "选择模式" -c $CURWDIR/../conf/modeList.conf 
+	
+}
 config()
 {
     generate-config-file $CUSTOMSETCONF
@@ -337,7 +349,10 @@ case "$1" in
         syncConfigFromTpToData;
         exit 0;
         ;;
-
+	"configMode")
+		configMode;
+		exit0;
+		;;	
     * )
         usage init;;
 esac
