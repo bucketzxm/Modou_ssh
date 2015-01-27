@@ -64,6 +64,69 @@ genIptablesRule()
     echo "COMMIT" >> $IPTABLESRULE
 }
 
+genGameRule()
+{
+	#游戏模式 局域网->白名单->redsocks
+	iptables-save -t nat > $SYSTEMTABLES
+    
+	sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
+    echo "" >> $IPTABLESRULE
+    cat $DEFAULTTABLES >> $IPTABLESRULE
+    
+    if [ -f "$DEFAULTLIST" ]; then
+	    echo "" >> $IPTABLESRULE
+	    cat $DEFAULTWHITE >> $IPTABLESRULE
+	fi
+
+    echo "" >> $IPTABLESRULE
+    echo "-A REDSOCKS -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+
+	echo "-A PDNS -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+	echo "COMMIT" >> $IPTABLESRULE	
+}
+genGlobalRule()
+{
+	#全局模式，所有包都重定向到 redsocks
+	iptables-save -t nat > $SYSTEMTABLES
+	
+	echo "" > $IPTABLESRULE
+
+	echo "*nat" >> $IPTABLESRULE
+	echo "-A REDSOCKS -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+	echo "COMMIT" >> $IPTABLESRULE
+	
+}
+genSmartRule()
+{
+	# 智能模式 国内ip  和  tcp port 80 + tcp port 442 重定向到redsocks
+
+	iptables-save -t nat > $SYSTEMTABLES
+
+	sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
+
+	echo "" >> $IPTABLESRULE
+	cat $DEFAULTTABLES >> $IPTABLESRULE
+
+	if [ -f "$DEFAULTLIST" ]; then
+		echo "" >> $IPTABLESRULE
+		cat $DEFAULTWHITE >> $IPTABLESRULE
+	fi
+	echo "" >> $IPTABLESRULE
+
+	echo "-A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+	echo "-A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+
+	echo "COMMIT" >> $IPTABLESRULE
+
+}
+genBackRule()
+{
+    iptables-save -t nat > $SYSTEMTABLES
+
+
+
+}
+
 IptablesAdd()
 {
     if [ ! -f "$IPTABLESRULE" ]; then
