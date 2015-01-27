@@ -47,12 +47,12 @@ SHELLBUTTON1="$CURWDIR/../sbin/ssh.sh config"
 SHELLBUTTON2="$CURWDIR/../sbin/ssh.sh start"
 SHELLBUTTON22="$CURWDIR/../sbin/ssh.sh stop"
 
-SHELLBUTTON3="$CURWDIR/../sbin/ssh.sh config_mode"
+SHELLBUTTON3="$CURWDIR/../sbin/ssh.sh configMode"
 
 CMDBUTTON1=${CMDHEAD}${SHELLBUTTON1}${CMDTAIL}
 CMDBUTTON2=${CMDHEAD}${SHELLBUTTON2}${CMDTAIL}
 CMDBUTTON22=${CMDHEAD}${SHELLBUTTON22}${CMDTAIL}
-CMDBUTON3=${CMDHEAD}${SHELLBUTTON3}${CMDTAIL}
+CMDBUTTON3=${CMDHEAD}${SHELLBUTTON3}${CMDTAIL}
 
 
 DATAJSON="$CURWDIR/../conf/data.json"
@@ -112,11 +112,14 @@ genCustomConfig()
 	echo $CMDBUTTON3 >> $CUSTOMCONF
 	echo '
 		"txt" : "选择模式",
-		"code": {}
+	' >> $CUSTOMCONF
+
+	echo $CMDBUTTON3 >>$CUSTOMCONF
+	echo '
+		"code": {"0": "OK","-1":"failed"}
 		}
 	}
-
-	'	
+	' >> $CUSTOMCONF	
     return 0;
 }
 

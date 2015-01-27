@@ -40,6 +40,15 @@ genDefaultRule()
     return 0
 }
 
+genBackRule()
+{
+
+	for lines in `cat $DEFAULTLIST`; do
+		echo "-A REDSOCKS -d $lines -j REDIRECT --to-ports $LOCALPORT" >>$IPTABLERULE
+	done
+	return 0
+}
+
 genIptablesRule()
 {
     # add system iptables
@@ -117,13 +126,6 @@ genSmartRule()
 	echo "-A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
 
 	echo "COMMIT" >> $IPTABLESRULE
-
-}
-genBackRule()
-{
-    iptables-save -t nat > $SYSTEMTABLES
-
-
 
 }
 
