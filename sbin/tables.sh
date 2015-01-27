@@ -42,10 +42,18 @@ genDefaultRule()
 
 genBackRule()
 {
+	if [ ! -f "$DEFAULTLIST" ]; then
+		return 0
+	fi
 
+	iptables-save -t nat > $SYSTEMTABLES
+	sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
+	echo "" >> $IPTABLESRULE
 	for lines in `cat $DEFAULTLIST`; do
-		echo "-A REDSOCKS -d $lines -j REDIRECT --to-ports $LOCALPORT" >>$IPTABLERULE
+		echo "-A REDSOCKS -p tcp -d $lines -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
 	done
+	echo "" >> $IPTABLESRULE
+	echo "COMMIT" >> $IPTABLESRULE
 	return 0
 }
 
@@ -97,10 +105,9 @@ genGlobalRule()
 {
 	#全局模式，所有包都重定向到 redsocks
 	iptables-save -t nat > $SYSTEMTABLES
-	
-	echo "" > $IPTABLESRULE
-
-	echo "*nat" >> $IPTABLESRULE
+	sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE	
+	echo "" >> $IPTABLESRULE
+#	echo "*nat" >> $IPTABLESRULE
 	echo "-A REDSOCKS -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
 	echo "COMMIT" >> $IPTABLESRULE
 	
@@ -181,33 +188,38 @@ case "$1" in
         exit 0;
         ;;
 	"gameMode")
+		IptablesClear;
 		genGameRule;
+		genIptablesRule;
 		IptablesAdd;
-		if [["0" != "$?" ]]; then
+		if [[ "0" != "$?" ]]; then
 			exit 1;
 		fi
 		exit 0;
 		;;
 	"globalMode")
+		IptablesClear;
 		genGlobalRule;
 		IptablesAdd;
-		if [["0" != "$?" ]]; then
+		if [[ "0" != "$?" ]]; then
 			exit 1;
 		fi
 		exit 0;
 		;;
 	"smartMode")
+		IptablesClear;
 		genSmartRule;
 		IptablesAdd;
-		if [["0" != "$?" ]]; then
+		if [[ "0" != "$?" ]]; then
 			exit 1;
 		fi
 		exit 0;
 		;;
 	"backMode")
+		IptablesClear;
 		genBackRule;
 		IptablesAdd;
-		if [["0" != "$?" ]]; then
+		if [[ "0" != "$?" ]]; then
 			exit 1;
 		fi
 		exit 0;
