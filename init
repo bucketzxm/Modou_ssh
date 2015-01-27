@@ -1,0 +1,154 @@
+#!/bin/sh
+
+
+CURDIR=$(cd $(dirname $0) && pwd)
+CONFDIR="$CURDIR/conf"
+
+PACKAGEID="com.modouwifi.vpnssh"
+
+
+CUSTOM_BIN="/system/apps/tp/bin/custom"
+CUSTOM_CONFIG_FILE="$CURDIR/conf/custom.conf"
+
+# to tp
+
+TO_TP_TITLE="SSH-VPN"
+TO_TP_CONF_DIR="/data/conf/launcher/conf.d"
+TO_TP_CONF_FILE=$TO_TP_CONF_DIR/ssh.conf
+
+TO_TP_ICON="$CURDIR/res/icon.png"
+TO_TP_PRESSED_ICON="$CURDIR/res/picon.png"
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CURDIR/lib
+
+usage()
+{
+    echo "ERROR: action missing"
+    echo "syntax: $0 <start|stop|restart|status|config|install|uninstall>"
+    echo "example: $0 start"
+}
+
+install()
+{
+    #to tp
+    if [! -d $TO_TP_CONF_DIR ];then
+        mkdir -p $TO_TP_CONF_DIR
+    fi
+
+    echo "{" > "$TO_TP_CONF_FILE"
+    echo "\"name\" : \"$TO_TP_TITLE\"," >> "$TO_TP_CONF_FILE"
+    echo "\"icon\" : \"$TO_TP_ICON\"," >> "$TO_TP_CONF_FILE"
+    echo "\"iconPressed\" : \"$TO_TP_PRESSED_ICON\"," >> "$TO_TP_CONF_FILE"
+    echo "\"exec\" : \"$CURDIR/sbin/ssh.sh starttp\"," >> "$TO_TP_CONF_FILE"
+    echo "\"msgNum\" : 4" >> "$TO_TP_CONF_FILE"
+    echo "}" >> "$TO_TP_CONF_FILE"
+
+    /system/sbin/appInfo.sh set_status $PACKAGEID NOTRUNNING
+    $CURDIR/sbin/ssh.sh restoreConfig
+    return 0;
+}
+
+uninstall()
+{
+    rm $TO_TP_CONF_FILE
+    echo "uninstall"
+    return 0
+}
+stop()
+{
+    $CURDIR/sbin/ssh.sh stop
+    #$CURDIR/sbin/tables.sh stop
+    #$CURDIR/sbin/pdns.sh stop
+    #$CURDIR/sbin/redsocks.sh stop
+    /system/sbin/appInfo.sh set_status $PACKAGEID NOTRUNNING
+    return 0;
+}
+
+start()
+{
+    $CURDIR/sbin/ssh.sh start
+    #$CURDIR/sbin/pdns.sh start
+    #$CURDIR/sbin/redsocks.sh start
+    #$CURDIR/sbin/tables.sh start
+    /system/sbin/appInfo.sh set_status $PACAKGEID ISRUNNING
+    return 0;
+
+}
+
+
+
+status()
+{
+    echo "Hello,modou";
+    return 0;
+}
+
+set_config()
+{
+    #remain to be config
+
+    $CURDIR/sbin/ssh.sh syncConfig
+    $CURDIR/sbin/ssh.sh stop
+    $CURDIR/sbin/ssh.sh start
+    #/system/sbin/appInfo.sh set_status $PACKAGEID ISRUNNING
+    return 0;
+}
+
+
+#main
+if [ $# -lt 1 ];then
+        usage init
+        exit 1
+fi
+
+
+case "$1" in
+    "stop")
+        stop;
+        if [ "0" != "$?" ];then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+
+    "start")
+        start;
+        if [ "0" != "$?" ];then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+    "status")
+        status;
+        if [ "0" != "$?" ];then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+
+    "set_config")
+        set_config;
+        if [ "0" != "$?" ];then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+    "install")
+        install;
+        if [ "0" != "$?"];then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+    "uninstall")
+        stop;
+        uninstall;
+        if [ "0" != "$?"];then
+            exit 1;
+        fi
+        ;;
+    *)
+        usage init;
+        exit 1;
+        ;;
+esac

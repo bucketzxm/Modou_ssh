@@ -1,0 +1,17 @@
+{
+	"start_ssh":{
+        "id" : "start_ssh",
+		"is_sync" : false,
+		"cmd" : "./init start",
+		"relative": true
+	},
+
+	"stop_ssh":{
+        "id" : "stop_ssh",
+		"is_sync": false,
+		"cmd" : "./init stop",
+		"relative": true
+	}
+
+
+}

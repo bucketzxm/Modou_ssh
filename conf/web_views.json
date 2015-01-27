@@ -1,0 +1,25 @@
+{
+  "widgets":
+    [
+      {
+        "id": "state_ssh",
+        "access": "RW"
+      },
+      {
+        "id": "service_ip_address",
+        "access": "RW"
+      },
+      {
+        "id": "port_ssh",
+        "access": "RW"
+      },
+      {
+        "id": "user",
+        "access": "RW"
+      },
+      {
+        "id": "password_ssh",
+        "access": "RW"
+      }
+    ]
+}
