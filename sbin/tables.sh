@@ -40,6 +40,23 @@ genDefaultRule()
     return 0
 }
 
+genBackRule()
+{
+    if [ ! -f "$DEFAULTLIST" ]; then
+        return 0
+    fi
+
+    iptables-save -t nat > $SYSTEMTABLES
+    sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
+    echo "" >> $IPTABLESRULE
+    for lines in `cat $DEFAULTLIST`; do
+        echo "-A REDSOCKS -p tcp -d $lines -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    done
+    echo "" >> $IPTABLESRULE
+    echo "COMMIT" >> $IPTABLESRULE
+    return 0
+}
+
 genIptablesRule()
 {
     # add system iptables
@@ -62,6 +79,61 @@ genIptablesRule()
     # redirect pdns tcp connect to local port
     echo "-A PDNSD -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
     echo "COMMIT" >> $IPTABLESRULE
+}
+
+genGameRule()
+{
+    #游戏模式 局域网->白名单->redsocks
+    iptables-save -t nat > $SYSTEMTABLES
+    
+    sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
+    echo "" >> $IPTABLESRULE
+    cat $DEFAULTTABLES >> $IPTABLESRULE
+    
+    if [ -f "$DEFAULTLIST" ]; then
+        echo "" >> $IPTABLESRULE
+        cat $DEFAULTWHITE >> $IPTABLESRULE
+    fi
+
+    echo "" >> $IPTABLESRULE
+    echo "-A REDSOCKS -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+
+    echo "-A PDNS -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    echo "COMMIT" >> $IPTABLESRULE  
+}
+genGlobalRule()
+{
+    #全局模式，所有包都重定向到 redsocks
+    iptables-save -t nat > $SYSTEMTABLES
+    sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE    
+    echo "" >> $IPTABLESRULE
+#   echo "*nat" >> $IPTABLESRULE
+    echo "-A REDSOCKS -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    echo "COMMIT" >> $IPTABLESRULE
+    
+}
+genSmartRule()
+{
+    # 智能模式 国内ip  和  tcp port 80 + tcp port 442 重定向到redsocks
+
+    iptables-save -t nat > $SYSTEMTABLES
+
+    sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
+
+    echo "" >> $IPTABLESRULE
+    cat $DEFAULTTABLES >> $IPTABLESRULE
+
+    if [ -f "$DEFAULTLIST" ]; then
+        echo "" >> $IPTABLESRULE
+        cat $DEFAULTWHITE >> $IPTABLESRULE
+    fi
+    echo "" >> $IPTABLESRULE
+
+    echo "-A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    echo "-A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+
+    echo "COMMIT" >> $IPTABLESRULE
+
 }
 
 IptablesAdd()
@@ -110,6 +182,43 @@ case "$1" in
 
     "genrule")
         genRule;
+        if [[ "0" != "$?" ]]; then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+    "gameMode")
+        IptablesClear;
+        genGameRule;
+        genIptablesRule;
+        IptablesAdd;
+        if [[ "0" != "$?" ]]; then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+    "globalMode")
+        IptablesClear;
+        genGlobalRule;
+        IptablesAdd;
+        if [[ "0" != "$?" ]]; then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+    "smartMode")
+        IptablesClear;
+        genSmartRule;
+        IptablesAdd;
+        if [[ "0" != "$?" ]]; then
+            exit 1;
+        fi
+        exit 0;
+        ;;
+    "backMode")
+        IptablesClear;
+        genBackRule;
+        IptablesAdd;
         if [[ "0" != "$?" ]]; then
             exit 1;
         fi

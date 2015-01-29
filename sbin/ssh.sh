@@ -46,9 +46,14 @@ CMDTAIL='",'
 SHELLBUTTON1="$CURWDIR/../sbin/ssh.sh config"
 SHELLBUTTON2="$CURWDIR/../sbin/ssh.sh start"
 SHELLBUTTON22="$CURWDIR/../sbin/ssh.sh stop"
+
+SHELLBUTTON3="$CURWDIR/../sbin/ssh.sh configMode"
+
 CMDBUTTON1=${CMDHEAD}${SHELLBUTTON1}${CMDTAIL}
 CMDBUTTON2=${CMDHEAD}${SHELLBUTTON2}${CMDTAIL}
 CMDBUTTON22=${CMDHEAD}${SHELLBUTTON22}${CMDTAIL}
+CMDBUTTON3=${CMDHEAD}${SHELLBUTTON3}${CMDTAIL}
+
 
 DATAJSON="$CURWDIR/../conf/data.json"
 usage()
@@ -64,13 +69,14 @@ genCustomConfig()
     # content : dynamic generated (contains setting info)
     # button1 : "账号配置"
     # button2 : "开启/关闭服务" (dynamic switch)
+    # button3 : "切换模式"
     echo '
     {
         "title" : "SSH VPN",
     ' > $CUSTOMCONF
 
-	  local content=`genCustomContentByName "autossh" "insertinfo" $CUSTOMSETCONF`
-	  echo $content >> $CUSTOMCONF
+      local content=`genCustomContentByName "autossh" "insertinfo" $CUSTOMSETCONF`
+      echo $content >> $CUSTOMCONF
     echo '
         "button1": {
     ' >> $CUSTOMCONF
@@ -95,22 +101,38 @@ genCustomConfig()
     fi
     echo '
             "code": {"0": "start success", "-1": "执行失败"}
-            }
-    }
+            },
+    
     ' >> $CUSTOMCONF
+
+    echo '
+        "button3": {
+    ' >> $CUSTOMCONF
+
+    echo $CMDBUTTON3 >> $CUSTOMCONF
+    echo '
+        "txt" : "选择模式",
+    ' >> $CUSTOMCONF
+
+    echo $CMDBUTTON3 >>$CUSTOMCONF
+    echo '
+        "code": {"0": "OK","-1":"failed"}
+        }
+    }
+    ' >> $CUSTOMCONF    
     return 0;
 }
 
 checkProcessStatusByName()
 {
-	local processname=$1
-	local status=`ps | grep $processname | wc -l`
-	if [ $status == "1" ]; then
-		echo "dead";
-	else
-		echo "alive";
-	fi
-	return 0;
+    local processname=$1
+    local status=`ps | grep $processname | wc -l`
+    if [ $status == "1" ]; then
+        echo "dead";
+    else
+        echo "alive";
+    fi
+    return 0;
 }
 
 
@@ -200,6 +222,11 @@ stop(){
     return 0
 }
 
+configMode()
+{
+    list -t "选择模式" -c $CURWDIR/../conf/modeList.conf 
+    
+}
 config()
 {
     generate-config-file $CUSTOMSETCONF
@@ -325,8 +352,10 @@ case "$1" in
         syncConfigFromTpToData;
         exit 0;
         ;;
-
+    "configMode")
+        configMode;
+        exit0;
+        ;;  
     * )
         usage init;;
 esac
-
