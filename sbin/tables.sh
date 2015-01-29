@@ -2,142 +2,141 @@
 CURWDIR=$(cd $(dirname $0) && pwd)
 
 LOCALPORT=${2:-1081}
+VPNMODE=$1
 
 DEFAULTLIST=$CURWDIR/../conf/defaultrange.txt
-CUSTOMLIST=$CURWDIR/../data/customrange.txt
-DEFAULTWHITE=$CURWDIR/../conf/default-whitelist.tables
 DEFAULTTABLES=$CURWDIR/../conf/default.tables
 SYSTEMTABLES=$CURWDIR/../conf/system.tables
 IPTABLESRULE=$CURWDIR/../conf/iptables.tables
 
+CHINARANGE=$CURWDIR/../conf/chinarange.txt
+CHINASETFILE=$CURWDIR/../conf/chinaset.ipset
+FILTERCHAIN="REDSOCKS"
+CHINASET="chinaset"
+
 usage()
 {
     echo "ERROR: action missing"
-    echo "syntax: $0 <start|stop|genrule> localport"
+    echo "syntax: $0 <start|stop|genrule|gameMode|globalMode|smartMode|backMode> localport"
     echo "example: $0 start"
 }
 
 IptablesClear()
 {
-    iptables -t nat -F PDNSD
-    iptables -t nat -D OUTPUT -p tcp -j PDNSD
-    iptables -t nat -X PDNSD
-    iptables -t nat -F REDSOCKS
-    iptables -t nat -D PREROUTING -p tcp -j REDSOCKS
-    iptables -t nat -X REDSOCKS
+    iptables -t nat -F PDNSD 1>/dev/null 2>&1
+    iptables -t nat -D OUTPUT -p tcp -j PDNSD 1>/dev/null 2>&1
+    iptables -t nat -X PDNSD 1>/dev/null 2>&1
+    iptables -t nat -F $FILTERCHAIN 1>/dev/null 2>&1
+    iptables -t nat -D PREROUTING -i br-lan -p tcp -j $FILTERCHAIN 1>/dev/null 2>&1
+    iptables -t nat -X $FILTERCHAIN 1>/dev/null 2>&1
 }
 
-genDefaultRule()
-{
-    rm $DEFAULTWHITE
-    if [ ! -f "$DEFAULTLIST" ]; then
+genChinaSet(){
+    if [ ! -f "$CHINARANGE" ]; then
         return 0
     fi
-    # add all rule to REDSOCKS Chain
-    for lines in `cat $DEFAULTLIST`; do
-        echo "-A REDSOCKS -d $lines -j RETURN" >> $DEFAULTWHITE
+    # create chinaset ipset
+    echo "create $CHINASET hash:net family inet">$CHINASETFILE
+    # add all localnet to ipset
+    echo "add $CHINASET 0.0.0.0/8">>$CHINASETFILE
+    echo "add $CHINASET 127.0.0.0/8">>$CHINASETFILE
+    echo "add $CHINASET 10.0.0.0/8">>$CHINASETFILE
+    echo "add $CHINASET 192.168.0.0/16">>$CHINASETFILE
+    echo "add $CHINASET 172.16.0.0/12">>$CHINASETFILE
+    # add all net to ipset
+    for lines in `cat $CHINARANGE`; do
+        echo "add $CHINASET $lines">>$CHINASETFILE
     done
+    echo "gen $CHINASETFILE ok"
     return 0
 }
 
-genBackRule()
-{
-    if [ ! -f "$DEFAULTLIST" ]; then
-        return 0
-    fi
-
-    iptables-save -t nat > $SYSTEMTABLES
-    sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
-    echo "" >> $IPTABLESRULE
-    for lines in `cat $DEFAULTLIST`; do
-        echo "-A REDSOCKS -p tcp -d $lines -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
-    done
-    echo "" >> $IPTABLESRULE
-    echo "COMMIT" >> $IPTABLESRULE
-    return 0
+IpSetAdd(){
+    ipset destroy $CHINASET
+    cat $CHINASETFILE | ipset restore
 }
 
-genIptablesRule()
-{
+genIptablesRule(){
     # add system iptables
     iptables-save -t nat > $SYSTEMTABLES
     # delete last 2 line
     sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
+
     # add default tables
     echo "" >> $IPTABLESRULE
     cat $DEFAULTTABLES >> $IPTABLESRULE
-    # add defaultlist
-    if [ -f "$DEFAULTLIST" ]; then
-        echo "" >> $IPTABLESRULE
-        cat $DEFAULTWHITE >> $IPTABLESRULE
-    fi
-    echo "" >> $IPTABLESRULE
-    # redirect to socket proxy prot
-    echo "-A REDSOCKS -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
-    #echo "-A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
-    #echo "-A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
+
+    case "$VPNMODE" in
+        "start")
+            genSmartRule;
+            ;;
+        "genrule")
+            genSmartRule;
+            ;;
+        "gameMode")
+            genGameRule;
+            ;;
+        "globalMode")
+            genGlobalRule;
+            ;;
+        "smartMode")
+            genSmartRule;
+            ;;
+        "backMode")
+            genBackRule;
+            ;;
+        *)
+            return 1;
+            ;;
+    esac
+
     # redirect pdns tcp connect to local port
     echo "-A PDNSD -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
     echo "COMMIT" >> $IPTABLESRULE
+
 }
 
-genGameRule()
-{
+genGameRule(){
     #游戏模式 局域网->白名单->redsocks
-    iptables-save -t nat > $SYSTEMTABLES
-    
-    sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
+    # add chinaset ipset rule
     echo "" >> $IPTABLESRULE
-    cat $DEFAULTTABLES >> $IPTABLESRULE
-    
-    if [ -f "$DEFAULTLIST" ]; then
-        echo "" >> $IPTABLESRULE
-        cat $DEFAULTWHITE >> $IPTABLESRULE
+    if [ -f "$CHINASETFILE" ]; then
+        echo "-A $FILTERCHAIN -m set --match-set $CHINASET dst -j RETURN" >> $IPTABLESRULE
     fi
-
-    echo "" >> $IPTABLESRULE
-    echo "-A REDSOCKS -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
-
-    echo "-A PDNS -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
-    echo "COMMIT" >> $IPTABLESRULE  
+    # redirect to socket proxy prot
+    echo "-A $FILTERCHAIN -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
 }
-genGlobalRule()
-{
-    #全局模式，所有包都重定向到 redsocks
-    iptables-save -t nat > $SYSTEMTABLES
-    sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE    
+
+genGlobalRule(){
+    #全局模式，所有tcp包都重定向到 redsocks
+    # add chinaset ipset rule
     echo "" >> $IPTABLESRULE
-#   echo "*nat" >> $IPTABLESRULE
-    echo "-A REDSOCKS -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
-    echo "COMMIT" >> $IPTABLESRULE
-    
+    if [ -f "$CHINASETFILE" ]; then
+        echo "-A $FILTERCHAIN -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    fi
 }
-genSmartRule()
-{
+
+genSmartRule(){
     # 智能模式 国内ip  和  tcp port 80 + tcp port 442 重定向到redsocks
-
-    iptables-save -t nat > $SYSTEMTABLES
-
-    sed 'N;$!P;$!D;$d' $SYSTEMTABLES > $IPTABLESRULE
-
+    # add chinaset ipset rule
     echo "" >> $IPTABLESRULE
-    cat $DEFAULTTABLES >> $IPTABLESRULE
-
-    if [ -f "$DEFAULTLIST" ]; then
-        echo "" >> $IPTABLESRULE
-        cat $DEFAULTWHITE >> $IPTABLESRULE
+    if [ -f "$CHINASETFILE" ]; then
+        echo "-A $FILTERCHAIN -m set --match-set $CHINASET dst -j RETURN" >> $IPTABLESRULE
     fi
-    echo "" >> $IPTABLESRULE
-
-    echo "-A REDSOCKS -p tcp --dport 80 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
-    echo "-A REDSOCKS -p tcp --dport 443 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
-
-    echo "COMMIT" >> $IPTABLESRULE
-
+    # redirect to socket proxy prot
+    echo "-A $FILTERCHAIN -p tcp --dport 80 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
+    echo "-A $FILTERCHAIN -p tcp --dport 443 -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE 
 }
 
-IptablesAdd()
-{
+genBackRule(){
+    # add chinaset ipset rule
+    echo "" >> $IPTABLESRULE
+    if [ -f "$CHINASETFILE" ]; then
+        echo "-A $FILTERCHAIN -m set --match-set $CHINASET dst -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
+    fi
+}
+
+IptablesAdd(){
     if [ ! -f "$IPTABLESRULE" ]; then
         return 1
     fi
@@ -145,21 +144,19 @@ IptablesAdd()
     return 0
 }
 
-genRule()
-{
-    IptablesClear;
-    genDefaultRule;
-    genIptablesRule;    
+genRule(){
+    genChinaSet;
+    genIptablesRule;
 }
 
-stop()
-{
+stop(){
     IptablesClear;
 }
 
-start()
-{
+start(){
+    IptablesClear;
     genRule;
+    IpSetAdd;
     IptablesAdd;
 }
 
@@ -188,37 +185,28 @@ case "$1" in
         exit 0;
         ;;
     "gameMode")
-        IptablesClear;
-        genGameRule;
-        genIptablesRule;
-        IptablesAdd;
+        start;
         if [[ "0" != "$?" ]]; then
             exit 1;
         fi
         exit 0;
         ;;
     "globalMode")
-        IptablesClear;
-        genGlobalRule;
-        IptablesAdd;
+        start;
         if [[ "0" != "$?" ]]; then
             exit 1;
         fi
         exit 0;
         ;;
     "smartMode")
-        IptablesClear;
-        genSmartRule;
-        IptablesAdd;
+        start;
         if [[ "0" != "$?" ]]; then
             exit 1;
         fi
         exit 0;
         ;;
     "backMode")
-        IptablesClear;
-        genBackRule;
-        IptablesAdd;
+        start;
         if [[ "0" != "$?" ]]; then
             exit 1;
         fi
