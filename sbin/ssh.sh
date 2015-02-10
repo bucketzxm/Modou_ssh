@@ -226,8 +226,8 @@ stop(){
 
 configMode()
 {
-	P=`cat $CURWDIR/conf/mode.conf`
-	if [ -n "$P" ]; then
+	P=`cat $CURWDIR/../conf/mode.conf`
+	if [ -n $P ]; then
 		P=0;
 	fi
     list -t "选择模式" -s $P -c $CURWDIR/../conf/modeList.conf 
