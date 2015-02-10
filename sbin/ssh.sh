@@ -5,6 +5,8 @@ port=$3
 user=$4
 password=$5
 
+
+
 CURWDIR=$(cd $(dirname $0) && pwd)
 
 # app information
@@ -224,7 +226,11 @@ stop(){
 
 configMode()
 {
-    list -t "选择模式" -c $CURWDIR/../conf/modeList.conf 
+	P=`cat $CURWDIR/conf/mode.conf`
+	if [ -n "$P" ]; then
+		P=0;
+	fi
+    list -t "选择模式" -s $P -c $CURWDIR/../conf/modeList.conf 
     
 }
 config()
