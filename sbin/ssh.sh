@@ -102,7 +102,7 @@ genCustomConfig()
         ' >> $CUSTOMCONF
     fi
     echo '
-            "code": {"0": "start success", "-1": "执行失败"}
+            "code": {"0": "执行成功", "-1": "执行失败"}
             },
     
     ' >> $CUSTOMCONF
@@ -118,7 +118,7 @@ genCustomConfig()
 
     echo $CMDBUTTON3 >>$CUSTOMCONF
     echo '
-        "code": {"0": "OK","-1":"failed"}
+        "code": {"0": "执行成功","-1":"执行失败"}
         }
     }
     ' >> $CUSTOMCONF    
@@ -170,7 +170,7 @@ genCustomContentByName()
         contentbody=${contentbody}${linetag}${configcontent};
     fi
     echo ${contenthead}${contentbody}${contenttail};
-    return 0;
+    return ;
 }
 
 starttp()
@@ -344,6 +344,9 @@ case "$1" in
     # start ---> start tp ( first step)
     "starttp"):
         starttp;
+		if [[ "0" != "$?" ]]; then
+			exit1;
+		fi
         exit 0;
         ;;
     "config" ):
