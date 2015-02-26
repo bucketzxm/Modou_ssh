@@ -70,23 +70,16 @@ start()
     #$CURDIR/sbin/pdns.sh start
     #$CURDIR/sbin/redsocks.sh start
     #$CURDIR/sbin/tables.sh start
-    /system/sbin/appInfo.sh set_status $PACAKGEID ISRUNNING
+    /system/sbin/appInfo.sh set_status $PACKAGEID ISRUNNING
     return 0;
-
 }
-
-
-
 status()
 {
     echo "Hello,modou";
     return 0;
 }
-
 set_config()
 {
-    #remain to be config
-
     $CURDIR/sbin/ssh.sh syncConfig
     $CURDIR/sbin/ssh.sh stop
     $CURDIR/sbin/ssh.sh start
