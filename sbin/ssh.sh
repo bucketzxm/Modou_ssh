@@ -363,7 +363,7 @@ case "$1" in
         ;;
     "configMode")
         configMode;
-        exit0;
+        exit 0;
         ;;  
     * )
         usage init;;

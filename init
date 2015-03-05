@@ -57,9 +57,6 @@ uninstall()
 stop()
 {
     $CURDIR/sbin/ssh.sh stop
-    #$CURDIR/sbin/tables.sh stop
-    #$CURDIR/sbin/pdns.sh stop
-    #$CURDIR/sbin/redsocks.sh stop
     /system/sbin/appInfo.sh set_status $PACKAGEID NOTRUNNING
     return 0;
 }
@@ -67,19 +64,20 @@ stop()
 start()
 {
     $CURDIR/sbin/ssh.sh start
-    #$CURDIR/sbin/pdns.sh start
-    #$CURDIR/sbin/redsocks.sh start
-    #$CURDIR/sbin/tables.sh start
-    /system/sbin/appInfo.sh set_status $PACKAGEID ISRUNNING
+    /system/sbin/appInfo.sh set_status $PACAKGEID ISRUNNING
     return 0;
 }
+
 status()
 {
     echo "Hello,modou";
     return 0;
 }
+
 set_config()
 {
+    #remain to be config
+
     $CURDIR/sbin/ssh.sh syncConfig
     $CURDIR/sbin/ssh.sh stop
     $CURDIR/sbin/ssh.sh start

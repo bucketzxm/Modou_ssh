@@ -1,0 +1,9 @@
+85.273206 main.c:152 main(...) redsocks started
+1425521497.552119 redsocks.c:702 redsocks_accept_client(...) [192.168.18.210:49474->95.169.190.26:443]: accepted
+1425521497.555074 utils.c:212 red_is_socket_connected_ok(...) connect: Connection refused
+1425521497.555865 redsocks.c:554 redsocks_relay_connected(...) [192.168.18.210:49474->95.169.190.26:443]: red_is_socket_connected_ok: Connection refused
+1425521497.556495 redsocks.c:332 redsocks_drop_client(...) [192.168.18.210:49474->95.169.190.26:443]: dropping client
+1425521497.572337 redsocks.c:702 redsocks_accept_client(...) [192.168.18.210:49475->95.169.190.26:443]: accepted
+1425521497.573202 utils.c:212 red_is_socket_connected_ok(...) connect: Connection refused
+1425521497.573369 redsocks.c:554 redsocks_relay_connected(...) [192.168.18.210:49475->95.169.190.26:443]: red_is_socket_connected_ok: Connection refused
+1425521497.573467 redsocks.c:332 redsocks_drop_client(...) [192.168.18.210:49475->95.169.190.26:443]: dropping client
