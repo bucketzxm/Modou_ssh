@@ -7,10 +7,14 @@ password=$5
 
 
 
+
 CURWDIR=$(cd $(dirname $0) && pwd)
 
 # app information
 PACKAGEID="com.modouwifi.vpnssh"
+
+#load mci config
+. $CURWDIR/../sbin/mci.sh 
 
 # since the app framework bug
 [ -f $CURWDIR/../data ] && rm $CURWDIR/../data
@@ -261,10 +265,14 @@ config()
 
 syncConfigFromDataToTp()
 {
-    local server=`/system/sbin/json4sh.sh get $DATAJSON service_ip_address value`
-    local port=`/system/sbin/json4sh.sh get $DATAJSON port_ssh value`
-    local user=`/system/sbin/json4sh.sh get $DATAJSON user value`
-    local password=`/system/sbin/json4sh.sh get $DATAJSON password_ssh value`
+    #local server=`/system/sbin/json4sh.sh get $DATAJSON service_ip_address value`
+    #local port=`/system/sbin/json4sh.sh get $DATAJSON port_ssh value`
+    #local user=`/system/sbin/json4sh.sh get $DATAJSON user value`
+    #local password=`/system/sbin/json4sh.sh get $DATAJSON password_ssh value`
+	local server=`mci get modou.sshvpn.service_ip_address 2>/dev/null`
+	local server=`mci get modou.sshvpn.port_ssh 2>/dev/null`
+	local user=`mci get modou.sshvpn.user 2>/dev/null`
+	local password=`mci get modou.sshvpn.password_ssh 2>/dev/null`
     if [ "$server" == "" ]; then
         server="0.0.0.0"
     fi
@@ -278,10 +286,12 @@ syncConfigFromDataToTp()
         password="未设置"
     fi
     # FIXME
-    echo "服务地址: $server
+    echo "服务地址: $server 
 端口号: $port
 用户名: $user
 密码: $password" > $CUSTOMSETCONF
+
+	return 0;
 }
 
 syncConfigFromTpToData()
@@ -303,16 +313,23 @@ syncConfigFromTpToData()
         passwd="未设置"
     fi
 
-    /system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $server
-    /system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $port
-    /system/sbin/json4sh.sh "set" $DATAJSON user value $user
-    /system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $password
+    #/system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $server
+    #/system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $port
+    #/system/sbin/json4sh.sh "set" $DATAJSON user value $user
+    #/system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $password
+	mci set modou.sshvpn.service_ip_address=$server
+	mci set modou.sshvpn.port_ssh=$port
+	mci set modou.sshvpn.user=$user
+	mci set modou.sshvpn.password_ssh=$password
     local isserverstart=`checkProcessStatusByName "autossh"`
     if [ "$isserverstart" == "alive" ]; then
-        /system/sbin/json4sh.sh "set" $DATAJSON state_ssh value true
+        #/system/sbin/json4sh.sh "set" $DATAJSON state_ssh value true
+		mci set modou.sshvpn.state_ssh="true"
     else
-        /system/sbin/json4sh.sh "set" $DATAJSON state_ssh value false
+        #/system/sbin/json4sh.sh "set" $DATAJSON state_ssh value false
+		mci set modou.sshvpn.state_ssh="false"
     fi
+	mci commit
     return 0
 
 }
