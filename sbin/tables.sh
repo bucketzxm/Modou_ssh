@@ -2,6 +2,7 @@
 CURWDIR=$(cd $(dirname $0) && pwd)
 
 LOCALPORT=${2:-1081}
+
 VPNMODE=$1
 
 DEFAULTLIST=$CURWDIR/../conf/defaultrange.txt
@@ -94,6 +95,7 @@ genIptablesRule(){
     echo "-A PDNSD -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
     echo "COMMIT" >> $IPTABLESRULE
 
+	return 1;
 }
 
 genGameRule(){
@@ -114,6 +116,7 @@ genGlobalRule(){
     if [ -f "$CHINASETFILE" ]; then
         echo "-A $FILTERCHAIN -p tcp -j REDIRECT --to-ports $LOCALPORT" >> $IPTABLESRULE
     fi
+	return 1;
 }
 
 genSmartRule(){
