@@ -93,7 +93,8 @@ genCustomConfig()
             },
         "button2": {
     ' >>$CUSTOMCONF
-    local isserverstart=`checkProcessStatusByName "autossh"`
+    local isserverstart=`checkProcessStatusByName autossh`
+	echo $isserverstart
     if [ "$isserverstart" == "alive" ]; then
         echo $CMDBUTTON22 >> $CUSTOMCONF
         echo '
@@ -140,9 +141,6 @@ checkProcessStatusByName()
     fi
     return 0;
 }
-
-
-# operations for generate a "custom" component configfile
 # usage:  genCustomContentByName "ss-redir" "insertinfo" infofile
 #         genCustomContentByName "ss-redir" "noinsertinfo"
 genCustomContentByName()
@@ -187,25 +185,21 @@ starttp()
 
 start(){
     if [ ! $server ]; then
-        #server=`/system/sbin/json4sh.sh get $DATAJSON service_ip_address value`
 		server=`mci get modou.sshvpn.service_ip_address 2>/dev/null`
     fi
     if [ ! $port ]; then
-        #port=`/system/sbin/json4sh.sh get $DATAJSON port_ssh value`
 		server=`mci get modou.sshvpn.port_ssh 2>/dev/null`
     fi
     if [ ! $user ]; then
-        #user=`/system/sbin/json4sh.sh get $DATAJSON user value`
 		user=`mci get modou.sshvpn.user 2>/dev/null`
     fi
     if [ ! $password ]; then
-        #password=`/system/sbin/json4sh.sh get $DATAJSON password_ssh value`
 		password=`mci get modou.sshvpn.password_ssh 2>/dev/null`
     fi
     export OPENSSH_PASSWORD=$password
     SSHFLAG="-N -D *:1080 $user@$server -p $port -F $CURWDIR/../conf/ssh_config"
     $AUTOSSHBIN -M 7000 $SSHFLAG 2>&1 | $ROTATELOGS $ROTATELOGSFLAG $LOG &
-    #genRedSocksConfig
+
     $CURWDIR/../sbin/pdns.sh start
     $CURWDIR/../sbin/redsocks.sh start
     $CURWDIR/../sbin/tables.sh start
@@ -228,7 +222,11 @@ stop(){
     genCustomConfig;
     pid=`cat $CUSTOMPIDFILE 2>/dev/null`;
     kill -SIGUSR1 $pid >/dev/null 2>&1;
+
+	autosshpid=`cat $PIDFILE 2>/dev/null`;
+	kill -9 $autosshpid > /dev/null 2>&1;
     /system/sbin/appInfo.sh set_status $PACKAGEID NOTRUNNING
+	genCustomConfig;
     return 0
 }
 
@@ -267,6 +265,7 @@ config()
         #/system/sbin/json4sh.sh "set" $DATAJSON state_ssh value false
 		mci set modou.sshvpn.state_ssh="false"
     fi
+	mci commit
     genCustomConfig;
     pid=`cat $CUSTOMPIDFILE 2>/dev/null`;
     kill -SIGUSR1 $pid >/dev/null 2>&1;
@@ -372,7 +371,7 @@ case "$1" in
     "starttp"):
         starttp;
 		if [[ "0" != "$?" ]]; then
-			exit1;
+			exit 1;
 		fi
         exit 0;
         ;;

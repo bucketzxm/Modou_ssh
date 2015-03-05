@@ -63,7 +63,7 @@ stop()
 
 start()
 {
-    $CURDIR/sbin/ssh.sh start
+    $CURDIR/sbin/ssh.sh starttp
     /system/sbin/appInfo.sh set_status $PACAKGEID ISRUNNING
     return 0;
 }
