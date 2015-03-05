@@ -187,16 +187,20 @@ starttp()
 
 start(){
     if [ ! $server ]; then
-        server=`/system/sbin/json4sh.sh get $DATAJSON service_ip_address value`
+        #server=`/system/sbin/json4sh.sh get $DATAJSON service_ip_address value`
+		server=`mci get modou.sshvpn.service_ip_address 2>/dev/null`
     fi
     if [ ! $port ]; then
-        port=`/system/sbin/json4sh.sh get $DATAJSON port_ssh value`
+        #port=`/system/sbin/json4sh.sh get $DATAJSON port_ssh value`
+		server=`mci get modou.sshvpn.port_ssh 2>/dev/null`
     fi
     if [ ! $user ]; then
-        user=`/system/sbin/json4sh.sh get $DATAJSON user value`
+        #user=`/system/sbin/json4sh.sh get $DATAJSON user value`
+		user=`mci get modou.sshvpn.user 2>/dev/null`
     fi
     if [ ! $password ]; then
-        password=`/system/sbin/json4sh.sh get $DATAJSON password_ssh value`
+        #password=`/system/sbin/json4sh.sh get $DATAJSON password_ssh value`
+		password=`mci get modou.sshvpn.password_ssh 2>/dev/null`
     fi
     export OPENSSH_PASSWORD=$password
     SSHFLAG="-N -D *:1080 $user@$server -p $port -F $CURWDIR/../conf/ssh_config"
@@ -245,11 +249,15 @@ config()
     user=`head -n 3 $CUSTOMSETCONF | tail -n 1 |  cut -d ' ' -f2-`;
     password=`head -n 4 $CUSTOMSETCONF | tail -n 1 | cut -d ' ' -f2-`;
 
-    #命令中用的是port,user,server,这里直接重新赋值一下
-    /system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $server
-    /system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $port
-    /system/sbin/json4sh.sh "set" $DATAJSON user value $user
-    /system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $password
+    #命令中用的是port,user,server,这里直接重新赋值下,方便调试
+    #/system/sbin/json4sh.sh "set" $DATAJSON service_ip_address value $server
+    #/system/sbin/json4sh.sh "set" $DATAJSON port_ssh value $port
+    #/system/sbin/json4sh.sh "set" $DATAJSON user value $user
+    #/system/sbin/json4sh.sh "set" $DATAJSON password_ssh value $password
+	mci set modou.sshvpn.service_ip_address=$server
+	mci set modou.sshvpn.port_ssh=$port
+	mci set modou.sshvpn.user=$user
+	mci set modou.sshvpn.password_ssh=$password
 
     local isserverstart=`checkProcessStatusByName "autossh"`
     if [ "$isserverstart" == "alive" ]; then
