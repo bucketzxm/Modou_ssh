@@ -261,9 +261,11 @@ config()
 
     local isserverstart=`checkProcessStatusByName "autossh"`
     if [ "$isserverstart" == "alive" ]; then
-        /system/sbin/json4sh.sh "set" $DATAJSON state_ssh value true
+        #/system/sbin/json4sh.sh "set" $DATAJSON state_ssh value true
+		mci set modou.sshvpn.state_ssh="true"
     else
         /system/sbin/json4sh.sh "set" $DATAJSON state_ssh value false
+		mci set modou.sshvpn.state_ssh="false"
     fi
     genCustomConfig;
     pid=`cat $CUSTOMPIDFILE 2>/dev/null`;
