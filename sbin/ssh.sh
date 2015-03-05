@@ -61,7 +61,7 @@ CMDBUTTON22=${CMDHEAD}${SHELLBUTTON22}${CMDTAIL}
 CMDBUTTON3=${CMDHEAD}${SHELLBUTTON3}${CMDTAIL}
 
 
-DATAJSON="$CURWDIR/../conf/data.json"
+#DATAJSON="$CURWDIR/../conf/data.json"
 usage()
 {
     echo "ERROR: action missing"
@@ -264,7 +264,7 @@ config()
         #/system/sbin/json4sh.sh "set" $DATAJSON state_ssh value true
 		mci set modou.sshvpn.state_ssh="true"
     else
-        /system/sbin/json4sh.sh "set" $DATAJSON state_ssh value false
+        #/system/sbin/json4sh.sh "set" $DATAJSON state_ssh value false
 		mci set modou.sshvpn.state_ssh="false"
     fi
     genCustomConfig;

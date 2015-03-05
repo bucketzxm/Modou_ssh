@@ -1,0 +1,6 @@
+config modouapp 'sshvpn'
+	option state_ssh 'false'
+	option service_ip_address ''
+	option port_ssh ''
+	option user ''
+	option password_ssh ''
