@@ -13,7 +13,7 @@
       "id" : "service_ip_address",
       "name" : "服务地址",
       "value" : "",
-      "mci" : "modou.ssvpn.service_ip_address",
+      "mci" : "modou.sshvpn.service_ip_address",
       "group_id" : "main_info_display",
       "type" : {
         "class" : "STRING",

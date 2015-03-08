@@ -161,7 +161,7 @@ vpnGenIptablesRule_backMode(){
     fi
 
     # redirect pdns tcp connect to local port
-    echo "-A PDNSD -d 114.114.114.114/32 -p tcp -j REDIRECT --to-ports $_LOCALPORT" >> $_IPTABLESRULE
+    echo "-A PDNSD -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $_LOCALPORT" >> $_IPTABLESRULE
     echo "COMMIT" >> $_IPTABLESRULE
 }
 
