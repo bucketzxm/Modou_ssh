@@ -1,0 +1,108 @@
+{
+    "main_page_ssh" : {
+      "id" : "main_page_ssh",
+      "name" : "SSH VPN",
+      "type" : "main",
+      "data" : {
+        "state_ssh" : {
+          "id" : "state_ssh",
+          "access" : "RO"
+        },
+        "service_ip_address" : {
+          "id" : "service_ip_address",
+          "access" : "RO"
+        },
+        "port_ssh" : {
+          "id" : "port_ssh",
+          "access" : "RO"
+        },
+        "user" : {
+          "id" : "user",
+          "access" : "RO"
+        },
+        "password_ssh" : {
+          "id" : "password_ssh",
+          "access" : "RO"
+        },
+        "mode" : {
+          "id" : "mode",
+          "access" : "RO"
+        }
+      },
+      "menu" : {
+        "1" : {
+          "index" : 1,
+          "text" : "开启服务",
+          "type" : "COMMAND",
+          "action" : "start_ssh",
+          "input" : "params"
+        },
+        "2" : {
+          "index" : 2,
+          "text" : "服务控制",
+          "type" : "MENU",
+          "items" : {
+            "1" : {
+              "index" : 1,
+              "text" : "开启服务",
+              "type" : "COMMAND",
+              "action" : "start_ssh",
+              "input" : "params"
+            },
+            "2" : {
+              "index" : 2,
+              "text" : "关闭服务",
+              "type" : "COMMAND",
+              "action" : "stop_ssh",
+              "input" : "params"
+            },
+            "3" : {
+              "index" : 3,
+              "text" : "配置账号",
+              "type" : "VIEW",
+              "viewid" : "page_account_setting"
+            }
+          }
+        },
+        "3" : {
+          "index" : 3,
+          "text" : "配置账号",
+          "type" : "VIEW",
+          "viewid" : "page_account_setting"
+        }
+      }
+    },
+    "page_account_setting" : {
+      "id" : "page_account_setting",
+      "name" : "配置账号",
+      "type" : "sub",
+      "data" : {
+          "service_ip_address" : {
+          "id" : "service_ip_address",
+          "access" : "RW"
+        },
+        "port_ssh" : {
+          "id" : "port_ssh",
+          "access" : "RW"
+        },
+        "user" : {
+          "id" : "user",
+          "access" : "RW"
+        },
+        "password_ssh" : {
+          "id" : "password_ssh",
+          "access" : "RW"
+        },
+        "mode" : {
+          "id" : "mode",
+          "access" : "RW"
+        },
+        "customdns" : {
+          "id" : "customdns",
+          "access" : "RW"
+        }
+
+      }
+    }
+ }
+

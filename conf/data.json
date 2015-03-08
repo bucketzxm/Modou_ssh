@@ -1,0 +1,84 @@
+{
+    "state_ssh" : {
+      "id" : "state_ssh",
+      "name" : "开关",
+      "value" : "",
+      "mci" : "modou.sshvpn.enable",
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "BOOL"
+      }
+    },
+    "service_ip_address" : {
+      "id" : "service_ip_address",
+      "name" : "服务地址",
+      "value" : "",
+      "mci" : "modou.ssvpn.service_ip_address",
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "STRING",
+        "min" : 7,
+        "max" : 50
+      }
+    },
+    "port_ssh" : {
+      "id" : "port_ssh",
+      "name" : "端口号",
+      "mci" : "modou.sshvpn.port_ssh",
+      "value" : "",
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "INT",
+        "min" : 10,
+        "max" : 9999999
+      }
+    },
+    "user" : {
+      "id" : "user",
+      "name" : "用户名",
+      "mci" : "modou.sshvpn.user",
+      "value" : "",
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "STRING",
+        "min" : 1,
+        "max" : 50
+      }
+    },
+    "password_ssh" : {
+      "id" : "password_ssh",
+      "name" : "密码",
+      "value" : "",
+      "mci" : "modou.sshvpn.password_ssh",
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "PASSWORD",
+        "min" : 1,
+        "max" : 50
+      }
+    },
+    "mode" : {
+      "id" : "mode",
+      "name" : "选择模式",
+      "mci" : "modou.sshvpn.mode",
+      "value" : "",
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "ENUM",
+        "items" : ["海外网站加速模式", "海外游戏加速模式", "完全海外模式", "回国模式"],
+        "multiple" : false
+      }
+    },
+    "customdns" : {
+      "id" : "customdns",
+      "name" : "特殊海外域名",
+      "mci" : "modou.sshvpn.customdns",
+      "value" : "",
+      "group_id" : "main_info_display",
+      "type" : {
+        "class" : "STRING",
+        "min" : 2,
+        "max" : 50
+      }
+    }
+ }

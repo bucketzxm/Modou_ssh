@@ -1,23 +1,18 @@
 #!/bin/sh
 
-
 CURDIR=$(cd $(dirname $0) && pwd)
-CONFDIR="$CURDIR/conf"
-
+CONFIDR="$CURDIR/conf"
 PACKAGEID="com.modouwifi.vpnssh"
-
-
-CUSTOM_BIN="/system/apps/tp/bin/custom"
-CUSTOM_CONFIG_FILE="$CURDIR/conf/custom.conf"
-
+TODNSMASQCONF="/data/conf/dns/ssh-vpn-dnsmasq.conf"
 # to tp
-
 TO_TP_TITLE="SSH-VPN"
 TO_TP_CONF_DIR="/data/conf/launcher/conf.d"
-TO_TP_CONF_FILE=$TO_TP_CONF_DIR/ssh.conf
-
+TO_TP_CONF_FILE="$TO_TP_CONF_DIR/ssh.conf"
 TO_TP_ICON="$CURDIR/res/icon.png"
 TO_TP_PRESSED_ICON="$CURDIR/res/picon.png"
+# insert the mci tool
+alias mci="uci -c $CURDIR/data/mci/"
+
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CURDIR/lib
 
@@ -39,31 +34,32 @@ install()
     echo "\"name\" : \"$TO_TP_TITLE\"," >> "$TO_TP_CONF_FILE"
     echo "\"icon\" : \"$TO_TP_ICON\"," >> "$TO_TP_CONF_FILE"
     echo "\"iconPressed\" : \"$TO_TP_PRESSED_ICON\"," >> "$TO_TP_CONF_FILE"
-    echo "\"exec\" : \"$CURDIR/sbin/ssh.sh starttp\"," >> "$TO_TP_CONF_FILE"
+    echo "\"exec\" : \"$CURDIR/sbin/ssh_ui.sh tpstart\"," >> "$TO_TP_CONF_FILE"
     echo "\"msgNum\" : 4" >> "$TO_TP_CONF_FILE"
     echo "}" >> "$TO_TP_CONF_FILE"
 
     /system/sbin/appInfo.sh set_status $PACKAGEID NOTRUNNING
-    $CURDIR/sbin/ssh.sh restoreConfig
     return 0;
 }
 
 uninstall()
 {
+    rm  $TODNSMASQCONF 2>/dev/null
     rm $TO_TP_CONF_FILE
     echo "uninstall"
     return 0
 }
+
 stop()
 {
-    $CURDIR/sbin/ssh.sh stop
+    $CURDIR/sbin/ssh_ui.sh stop
     /system/sbin/appInfo.sh set_status $PACKAGEID NOTRUNNING
     return 0;
 }
 
 start()
 {
-    $CURDIR/sbin/ssh.sh starttp
+    $CURDIR/sbin/ssh_ui.sh start
     /system/sbin/appInfo.sh set_status $PACAKGEID ISRUNNING
     return 0;
 }
@@ -76,15 +72,17 @@ status()
 
 set_config()
 {
-    #remain to be config
-
-    $CURDIR/sbin/ssh.sh syncConfig
-    $CURDIR/sbin/ssh.sh stop
-    $CURDIR/sbin/ssh.sh start
-    #/system/sbin/appInfo.sh set_status $PACKAGEID ISRUNNING
+    local isenable=`mci get modou.sshvpn.enable 2>/dev/null`
+    if [ "$isenable" == "true" ]; then
+        $CURDIR/sbin/ssh_ui.sh stop
+        $CURDIR/sbin/ssh_ui.sh start
+        /system/sbin/appInfo.sh set_status $PACKAGEID ISRUNNING
+    else
+        $CURDIR/sbin/ssh_ui.sh stop
+        /system/sbin/appInfo.sh set_status $PACKAGEID NOTRUNNING
+    fi
     return 0;
 }
-
 
 #main
 if [ $# -lt 1 ];then

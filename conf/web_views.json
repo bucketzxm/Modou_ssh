@@ -20,6 +20,15 @@
       {
         "id": "password_ssh",
         "access": "RW"
+      },
+      {
+        "id": "mode",
+        "access": "RW"
+      },
+      {
+        "id": "customdns",
+        "access": "RW"
       }
+
     ]
 }
