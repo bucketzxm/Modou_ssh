@@ -14,13 +14,13 @@ CURDIR=$(cd $(dirname $0) && pwd)
 
 case "$1" in
     "smart")
-        mci set modou.sshvpn.mode="海外网站加速模式"
+        mci set modou.sshvpn.mode="智能模式"
         ;;
     "game")
-        mci set modou.sshvpn.mode="海外游戏加速模式"
+        mci set modou.sshvpn.mode="游戏模式"
         ;;
     "global")
-        mci set modou.sshvpn.mode="完全海外模式"
+        mci set modou.sshvpn.mode="全局模式"
         ;;
     "back")
         mci set modou.sshvpn.mode="回国模式"

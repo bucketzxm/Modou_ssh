@@ -30,6 +30,7 @@ autosshServiceStart()
     export AUTOSSH_PIDFILE=$_PIDFILE
     export OPENSSH_PASSWORD=$passwd
 
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$_CURDIR/../lib
     local SSHFLAG="-N -D *:1080 -p $serverport $user@$serveraddr -F $_CURDIR/../conf/ssh_config"
     $_AUTOSSHBIN -M 7000 $SSHFLAG 2>&1 | $_ROTATELOGS $_ROTATELOGSFLAG $_LOG &
     return 0

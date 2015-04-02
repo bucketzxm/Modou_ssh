@@ -1,4 +1,4 @@
 :PDNSD - [0:0]
 :REDSOCKS - [0:0]
--I PREROUTING -i br-lan -p tcp -j REDSOCKS
+-I ALLOW_RULES -i br-lan -p tcp -j REDSOCKS
 -A OUTPUT -p tcp -j PDNSD

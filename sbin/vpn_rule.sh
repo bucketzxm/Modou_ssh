@@ -17,7 +17,7 @@ vpnIptablesClear(){
     iptables -t nat -D OUTPUT -p tcp -j PDNSD 1>/dev/null 2>&1
     iptables -t nat -X PDNSD 1>/dev/null 2>&1
     iptables -t nat -F $_FILTERCHAIN 1>/dev/null 2>&1
-    iptables -t nat -D PREROUTING -i br-lan -p tcp -j $_FILTERCHAIN 1>/dev/null 2>&1
+    iptables -t nat -D ALLOW_RULES -i br-lan -p tcp -j $_FILTERCHAIN 1>/dev/null 2>&1
     iptables -t nat -X $_FILTERCHAIN 1>/dev/null 2>&1
 }
 
@@ -81,7 +81,8 @@ vpnGenIptablesRule_smartMode(){
         echo "-A $_FILTERCHAIN -m set --match-set $_CHINASET dst -j RETURN" >> $_IPTABLESRULE
     fi
     # redirect to socket proxy prot
-    echo "-A $_FILTERCHAIN -p tcp -j REDIRECT --to-ports $_LOCALPORT" >> $_IPTABLESRULE
+    echo "-A $_FILTERCHAIN -p tcp --dport 80 -j REDIRECT --to-ports $_LOCALPORT" >> $_IPTABLESRULE
+    echo "-A $_FILTERCHAIN -p tcp --dport 443 -j REDIRECT --to-ports $_LOCALPORT" >> $_IPTABLESRULE
     # redirect pdns tcp connect to local port
     echo "-A PDNSD -d 8.8.8.8/32 -p tcp -j REDIRECT --to-ports $_LOCALPORT" >> $_IPTABLESRULE
     echo "COMMIT" >> $_IPTABLESRULE
@@ -157,7 +158,7 @@ vpnGenIptablesRule_backMode(){
     # redirect to socket proxy prot
     echo "" >> $_IPTABLESRULE
     if [ -f "$_CHINASETFILE" ]; then
-        echo "-A $_FILTERCHAIN -m set --match-set $_CHINASET dst -p tcp -j REDIRECT --to-ports $_LOCALPORT" >> $_IPTABLESRULE
+        echo "-A $_FILTERCHAIN -m set --match-set $_CHINASET dst -p tcp --dport 80 -j REDIRECT --to-ports $_LOCALPORT" >> $_IPTABLESRULE
     fi
 
     # redirect pdns tcp connect to local port
@@ -182,11 +183,11 @@ vpnGenRule(){
     vpnGenLocalNetIpSet
     vpnGenChinaIpSet;
     local mode=`mci get modou.sshvpn.mode 2>/dev/null`
-    if [ "$mode" == "" -o "$mode" == "海外网站加速模式" ]; then
+    if [ "$mode" == "" -o "$mode" == "智能模式" ]; then
       vpnGenIptablesRule_smartMode
-    elif [ "$mode" == "海外游戏加速模式" ]; then
+    elif [ "$mode" == "游戏模式" ]; then
       vpnGenIptablesRule_gameMode
-    elif [ "$mode" == "完全海外模式" ]; then
+    elif [ "$mode" == "全局模式" ]; then
       vpnGenIptablesRule_globalMode
     else
       vpnGenIptablesRule_backMode

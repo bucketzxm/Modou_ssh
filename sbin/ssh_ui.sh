@@ -37,6 +37,7 @@ SHELLBUTTON3="$CURDIR/../sbin/ssh_ui.sh start"
 SHELLBUTTON33="$CURDIR/../sbin/ssh_ui.sh stop"
 CUSTOMPIDFILE="$CURDIR/../conf/custom.pid"
 # insert custom dnsmasq config (dynamic path) to system
+SYSTEMDNSMASQDIR="/data/conf/dns"
 CUSTOMDNSMASQCONF="$CURDIR/../conf/ssh-vpn-dnsmasq.conf"
 INSERTEDCUSTOMDNSMASQCONF=$SYSTEMDNSMASQDIR/ssh-vpn-dnsmasq.conf
 
@@ -167,11 +168,17 @@ sshTrigerStart()
   local isserverstart=`uiCheckProcessStatusByName "autossh"`
   if [ "$isserverstart" == "alive" ]; then
       mci set modou.sshvpn.enable="true"
+      /system/sbin/appInfo.sh set_status $PACKAGEID ISRUNNING
   else
       mci set modou.sshvpn.enable="false"
+      /system/sbin/appInfo.sh set_status $PACKAGEID NOTRUNNING
+      vpnRuleStop
+      pdnsdStopService
+      redsocksServiceStop
+      dnsmasqDelCustomConfig $INSERTEDCUSTOMDNSMASQCONF
+      dnsmasqServiceReload
   fi
   mci commit
-  /system/sbin/appInfo.sh set_status $PACKAGEID ISRUNNING
   return 0;
 }
 

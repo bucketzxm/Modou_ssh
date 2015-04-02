@@ -65,20 +65,22 @@
       "group_id" : "main_info_display",
       "type" : {
         "class" : "ENUM",
-        "items" : ["海外网站加速模式", "海外游戏加速模式", "完全海外模式", "回国模式"],
+        "items" : ["智能模式", "游戏模式", "全局模式", "回国模式"],
         "multiple" : false
       }
     },
     "customdns" : {
       "id" : "customdns",
       "name" : "特殊海外域名",
+      "tips" : "一行一个域名，例如google.com"
       "mci" : "modou.sshvpn.customdns",
       "value" : "",
       "group_id" : "main_info_display",
       "type" : {
         "class" : "STRING",
         "min" : 2,
-        "max" : 50
+        "max" : 9999999,
+        "multiple" : true
       }
     }
  }

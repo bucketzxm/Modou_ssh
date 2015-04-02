@@ -1,16 +1,16 @@
 {
 "package_id"      : "com.modouwifi.vpnssh",
-"os_version"      : "1.3.02",
+"os_version"      : "1.4.03",
 "name"            : "app-ssh-vpn",
 "display_name"    : "SSH VPN",
 "author"          : "魔豆开发者",
 "author_mail"     : "dev@mochui.net",
 "homepage"        : "modouwifi.com",
-"version"         : "0.2.0",
+"version"         : "0.2.1",
 "release_date"    : "2015.1.6",
 "icon"            : "./res/icon.png",
 "location"        : "internal",
 "mci"             : "enable",
 "description"     : "实现企业和个人用户绕开防火墙，以便更好地开展工作",
-"instruction"     : "需要一个SSH的帐号，安装好SSH-VPN后可以通过触摸屏或魔豆路由宝手机应用配置服务器信息"
+"instruction"     : "您需要一个SSH帐号，并通过触摸屏、魔豆路由宝、WEB后台进行配置。<br> -------------------- <br>支持四种模式: <br> *智能模式*：智能区分海外和国内流量,并且智能过滤迅雷等下载流量；<br>*全局模式*：让您完全置身海外；<br>*回国模式*：让在海外的您，和国内的小伙伴一起追剧；<br>*游戏模式*：支持游戏外服加速,需注意迅雷等下载流量。<br> -------------------- <br>*特殊海外域名*，自定义添加您需要加速的海外网站域名，需要注意格式哦!"
 }
